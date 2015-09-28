@@ -10,6 +10,7 @@ This is what Requestador does for you.
 ## Listeners ##
 Listeners are configured in listeners.inc
 The formatting of this file is like this:
+
 name | method | uri | senders_csv
 
 * name: a unique identifier for a listener
