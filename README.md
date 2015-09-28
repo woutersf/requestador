@@ -1,11 +1,13 @@
-## request hub/relay/mediator ##
+# Requestador #
+##### your next web hub/relay/mediator #####
 
+## Intro ##
 Sometimes you need POSTs to be GET's, GEt's to become POST's or
 either one of the to become PUSH on socket.
 This is what Requestador does for you.
 
 
-## listeners ##
+## Listeners ##
 Listeners are configured in listeners.inc
 The formatting of this file is like this:
 name | method | uri | senders_csv
@@ -15,7 +17,7 @@ name | method | uri | senders_csv
 * uri: The socket channel "testchannel" or a certain uri "/testuri" on the current domain.
 * senders_csv: a comma separated list of SENDER ID's.
 
-## senders ##
+## Senders ##
 Senders are configured in senders.inc
 The formatting of this file is like this:
 
