@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Frederik Wouters">
+
+    <title>Requestador</title>
+
+    <!-- Bootstrap Core CSS -->
+
+
+    <!-- Custom CSS -->
+    <style>
+    body {
+        padding-top: 70px;
+        /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+    }
+
+    .toggled{
+      display: none;
+    }
+        </style>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="js/jquery-1.11.1.js"></script>
+    <script src="js/socket.io-1.2.0.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <!-- <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button> -->
+                <a class="navbar-brand" href="#">Requestador
+              <br></a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <!-- <li>
+                        <a href="#">About</a>
+                    </li>
+                    <li>
+                        <a href="#">Services</a>
+                    </li>
+                    <li>
+                        <a href="#">Contact</a>
+                    </li> -->
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+
+
+        <div class="row">
+            <div class="col-lg-12 text-center">
+
+              <ul class="nav nav-tabs toggles">
+                <li role="presentation"><a href="#listeners" class="toggle toggle1" rel="listeners">Listeners</a></li>
+                <li role="presentation"><a href="#senders" class="toggle toggle1" rel="senders">Senders</a></li>
+                <li role="presentation"><a href="#socket" class="toggle toggle1" rel="socket">test socket</a></li>
+                <li role="presentation"><a href="#socketmessages" class="toggle toggle1" rel="socketmessages">socket messages</a></li>
+
+              </ul>
+
+
+              <img src="images/requestador.png" width="20%" style="float:right;margin:10px;">
+
+
+              <div class="row toggled" id="senders">
+                  <h1>Senders</h1>
+                  "<i>name | method | url | data</i>" <br>Allowerd datatypes: forward (forward postbody or socket msg) empty or fixed
+                  <form method="POST" action="admin/senders">
+                  <textarea style="width:600px;height:400px;">{senders}</textarea><br>
+                  <input type="submit" value="Save"/>
+                  </form>
+              </div>
+
+
+
+              <div class="row toggled" id="listeners">
+                  <h1>Listeners</h1>
+                  "<i>name | method | uri | senders_csv</i>"
+                  <form method="POST" action="admin/listeners">
+                  <textarea  style="width:600px;height:400px;">{listeners}</textarea><br>
+                  <input type="submit" value="Save"/>
+                  </form>
+              </div>
+
+
+              <div class="row toggled" id="socket">
+                  <h1>test socket event</h1>
+                  <form method="POST"  id="socketTest">
+                  Json:<br>
+                  <textarea name="message" id="message" style="width:300px;height:100px;">{foo:'barf'}</textarea><br>
+                  <input type="submit" value="Test"/>
+                  </form>
+              </div>
+
+
+
+              <div class="row toggled" id="socketmessages">
+                  <h1>Messages</h1>
+                  <div  style="border:1px solid gray;min-height:200px;"><ul id="messages">
+                  </ul></div>
+              </div>
+
+
+              <script>
+
+
+            $(document).ready(function(){
+
+                //ON SOCKET receive
+                var socket = io();
+                socket.on('testchannel1', function(data) {
+                      console.log('socket data received:',data);
+                      var html = '<li>' + JSON.stringify(data); + '</li>' ;
+                      $('#messages').append(html);
+                });
+
+                //POST TO SOCKET
+                $('#socketTest').submit(function(){
+                  console.log('Push test to socket');
+                  var $input = $('#message').val();
+                  socket.emit('test', $input);
+                  //$('#m').val('');
+                  return false;
+                });
+
+                //Toggling
+                $('a.toggle').click(function(){
+                  var $this = $(this);
+                  $('.toggled').hide();
+                  var $rel = $this.attr('rel');
+                  console.log($rel);
+                  $('#' + $rel).show();
+                });
+
+            });
+
+            </script>
+
+            </div>
+        </div>
+        <!-- /.row -->
+
+    </div>
+    <!-- /.container -->
+
+</body>
+
+</html>
+
+
+
+
