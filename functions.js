@@ -19,28 +19,46 @@ var executeSender = function(req, sender, body){
  */
 var executeSenderHTTP = function(req, sender, body){
     var request = require('request');
-    console.log('[SENDER] execute ', sender.type , ' to ', sender.url);
-    // Set the headers
+    var querystring = require('querystring');
     var headers = {
-        'User-Agent':       'Super Agent/0.0.1',
         'Content-Type':     'application/x-www-form-urlencoded',
     }
+    if (sender.type == 'POST') {
+        //POST
+        request.post({
+          headers: headers,
+          url:     sender.url,
+          headers: headers,
+          body:    body
+        }, function(error, response, body){
+          if (!error && response.statusCode == 200) {
+                console.log('[POSTREQUEST] request returned OK');
+                console.log(body)
+            } else {
+                console.log('[POSTREQUEST] request returned NOK: ' , error);
+            }
+        });
+    }else{
 
-    // Configure the request
-    var options = {
-        url: sender.url,
-        method: sender.type,
-        headers: headers,
-        data: body
-    }
-
-    // Start the request
-    request(options, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-            // Print out the response body
-            //console.log(body)
+        //GET
+        var options = {
+            url: sender.url,
+            method: sender.type,
+            headers: headers,
         }
-    })
+
+        // Start the request
+        request(options, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                console.log('[GETREQUEST] request returned OK');
+                // Print out the response body
+                console.log(body)
+            } else {
+                console.log('[GETREQUEST] request returned NOK: ' , error);
+                //console.log(body);
+            }
+        })
+    }
 }
 
 /**
