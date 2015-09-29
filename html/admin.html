@@ -99,8 +99,12 @@
                   <h1>Senders</h1>
                   "<i>name | method | url | data</i>" <br>Allowerd datatypes: forward (forward postbody or socket msg) empty or fixed
                   <form method="POST" action="admin/senders">
-                  <textarea style="width:600px;height:400px;">{senders}</textarea><br>
-                  <input type="submit" value="Save"/>
+                  <div class="input-group">
+                    <textarea  class="form-control" style="width:600px;height:400px;">{senders}</textarea><br>
+                  </div>
+                  <div class="input-group">
+                    <input class="form-control btn btn-success" type="submit" value="Save"/>
+                  </div>
                   </form>
               </div>
 
@@ -110,8 +114,12 @@
                   <h1>Listeners</h1>
                   "<i>name | method | uri | senders_csv</i>"
                   <form method="POST" action="admin/listeners">
-                  <textarea  style="width:600px;height:400px;">{listeners}</textarea><br>
-                  <input type="submit" value="Save"/>
+                  <div class="input-group">
+                    <textarea  class="form-control" style="width:600px;height:400px;">{listeners}</textarea>
+                  </div>
+                  <div class="input-group">
+                    <input class="form-control btn btn-success" type="submit" value="Save"/>
+                  </div>
                   </form>
               </div>
 
@@ -119,9 +127,13 @@
               <div class="row toggled" id="socket">
                   <h1>test socket event</h1>
                   <form method="POST"  id="socketTest">
-                  Json:<br>
-                  <textarea name="message" id="message" style="width:300px;height:100px;">{foo:'barf'}</textarea><br>
-                  <input type="submit" value="Test"/>
+                  Json:
+                  <div class="input-group">
+                    <textarea name="message" id="message" style="width:300px;height:100px;">{foo:'barf'}</textarea>
+                  </div>
+                  <div class="input-group">
+                    <input class="form-control btn btn-success" type="submit" value="Test"/>
+                  </div>
                   </form>
               </div>
 
