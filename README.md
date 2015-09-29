@@ -1,6 +1,13 @@
 # Requestador #
 ##### your next web hub/relay/mediator #####
 
+## Installation ##
+npm install
+
+## Run ##
+node index.js
+
+
 ## Intro ##
 Sometimes you need POSTs to be GET's, GEt's to become POST's or
 either one of the to become PUSH on socket.
