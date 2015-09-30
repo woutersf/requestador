@@ -8,44 +8,19 @@ fs = require('fs');
 var mime = require('mime');
 var qs = require('querystring');
 var Stomp = require('stomp-client');
-var config = ini.parse(fs.readFileSync('./data/config.ini', 'utf-8'))
-console.log('Config parsed:');
-console.log(config);
-if (config.amq.useamq) {
-    try{
-        var client = new Stomp(config.amq.ip, config.amq.port, config.amq.user, config.amq.password);
-        client.connect(function(sessionId) {
-            data.getSenders(function(senders){
-                data.getListeners(function(listeners){
-                    listeners.forEach(function(listener){
-                        if (listener.type.toUpperCase() == 'AMQ') {
-                            client.subscribe(listener.url, function(body, headers) {
-                              console.log('This is the body of a message on the subscribed queue:', body);
-                                console.log('=============AMQ MESG================');
-                                console.log('[QIO] [' + listener.url + ']received on Queue: ' , body);
-                                functions.loopListeners(listeners, senders, null, 'STOMP', listener.url, body);
-                            });
-                        }
-                    });
-                });
-            });
-        });
-    }
-    catch(e) {
-        console.log('could not connect to AMQ');
-    }
-}
+var config = ini.parse(fs.readFileSync('./data/config.ini', 'utf-8'));
 
 
 
 
+//////////////////    WEB   //////////////////////
 var server = http.createServer( function(req, res) {
     if (functions.requestIsStatic(req,res)) {
         functions.serveStatic(req,res);
     }
     console.log('=============REQUEST================');
     console.log(req.url);
-    if (req.method == 'POST') {
+    if (req.method == 'POST' && config.web.useweb) {
         console.log("POST");
         var body = '';
         req.on('data', function (data) {
@@ -89,7 +64,7 @@ var server = http.createServer( function(req, res) {
         // res.writeHead(200, {'Content-Type': 'text/html'});
         // res.end('post received');
     }
-    else
+    else if(req.method == 'GET' && config.web.useweb)
     {
         console.log("GET");
         if (req.url == '/admin') {
@@ -119,12 +94,18 @@ var server = http.createServer( function(req, res) {
                 });
             });
         }
+    }else{
+        console.log('[WEB] unsupported request type or server not enabled in config');
     }
 });
 global.server = server;
 
 
+
+//////////////////    SOCKET   //////////////////////
+
 if (config.server.usesocketio) {
+    console.log('[IO] socket IO is enabled');
     global.io = require('socket.io')(server);
     console.log('[IO] attempt connect');
     global.io.on('connection', function(socket){
@@ -154,9 +135,19 @@ if (config.server.usesocketio) {
             console.log('[IO] connect');
         });
     });
+}else{
+    console.log('[IO] socket IO is disabled in config');
 }
 
+
+
+//////////////////    START   //////////////////////
 port = config.server.port;
 host = config.server.ip;
-server.listen(port, host);
+if (config.server.useweb || config.server.usesocketio) {
+    server.listen(port, host);
+}else{
+    console.log('[WEB] server disabled in config');
+}
+
 console.log('Listening at http://' + host + ':' + port);
