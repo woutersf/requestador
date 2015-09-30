@@ -24,6 +24,30 @@
     .toggled{
       display: none;
     }
+
+
+    /* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+  background-color: #f5f5f5;
+}
+
+.container .text-muted {
+  margin: 20px 0;
+}
         </style>
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -185,8 +209,17 @@
         </div>
         <!-- /.row -->
 
+
+
     </div>
     <!-- /.container -->
+
+
+    <footer class="footer">
+      <div class="container">
+        <p class="text-muted"><a href="http://requestador.io">Requestador</a> - <a href="https://github.com/wouters-frederik/requestador">github</a>  - <a href="http://it2servu.be">support</a></p>
+      </div>
+    </footer>
 
 </body>
 

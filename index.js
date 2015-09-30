@@ -1,4 +1,5 @@
 
+var ini = require('ini')
 var functions = require('./functions');
 var data = require('./data');
 var http = require('http');
@@ -6,6 +7,35 @@ var request = require('request');
 fs = require('fs');
 var mime = require('mime');
 var qs = require('querystring');
+var Stomp = require('stomp-client');
+var config = ini.parse(fs.readFileSync('./data/config.ini', 'utf-8'))
+console.log('Config parsed:');
+console.log(config);
+if (config.amq.useamq) {
+    try{
+        var client = new Stomp(config.amq.ip, config.amq.port, config.amq.user, config.amq.password);
+        client.connect(function(sessionId) {
+            data.getSenders(function(senders){
+                data.getListeners(function(listeners){
+                    listeners.forEach(function(listener){
+                        if (listener.type.toUpperCase() == 'AMQ') {
+                            client.subscribe(listener.url, function(body, headers) {
+                              console.log('This is the body of a message on the subscribed queue:', body);
+                                console.log('=============AMQ MESG================');
+                                console.log('[QIO] [' + listener.url + ']received on Queue: ' , body);
+                                functions.loopListeners(listeners, senders, null, 'STOMP', listener.url, body);
+                            });
+                        }
+                    });
+                });
+            });
+        });
+    }
+    catch(e) {
+        console.log('could not connect to AMQ');
+    }
+}
+
 
 
 
@@ -94,7 +124,8 @@ var server = http.createServer( function(req, res) {
 global.server = server;
 
 
-global.io = require('socket.io')(server);
+if (config.server.usesocketio) {
+    global.io = require('socket.io')(server);
     console.log('[IO] attempt connect');
     global.io.on('connection', function(socket){
         global.socket = socket;
@@ -102,11 +133,13 @@ global.io = require('socket.io')(server);
         data.getSenders(function(senders){
             data.getListeners(function(listeners){
                 listeners.forEach(function(listener){
-                    socket.on(listener.url, function(msg){
-                        console.log('=============SOCKET MESG================');
-                        console.log('[IO] [' + listener.url + ']received on socket: ' , msg);
-                        functions.loopListeners(listeners, senders, null, 'SOCKET', listener.url, msg);
-                    });
+                    if (listener.type.toUpperCase() == 'SOCKET') {
+                        socket.on(listener.url, function(msg){
+                            console.log('=============SOCKET MESG================');
+                            console.log('[IO] [' + listener.url + ']received on socket: ' , msg);
+                            functions.loopListeners(listeners, senders, null, 'SOCKET', listener.url, msg);
+                        });
+                    }
                 });
             });
         });
@@ -121,9 +154,9 @@ global.io = require('socket.io')(server);
             console.log('[IO] connect');
         });
     });
+}
 
-
-port = 3000;
-host = '127.0.0.1';
+port = config.server.port;
+host = config.server.ip;
 server.listen(port, host);
 console.log('Listening at http://' + host + ':' + port);
