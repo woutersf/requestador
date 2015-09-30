@@ -1,14 +1,16 @@
 # Requestador #
 This is under development and in no way ready for production yet.
 
-##### http / socket / stomp mediator #####
+##### HTTP / SOCKET / STOMP mediator #####
 
 ## Installation ##
 npm install
+
 configure settings in data/config.ini
 
 ## Run ##
 node index.js (for socket + web)
+
 node amq.js (for stomp listening)
 
 ## Intro ##
