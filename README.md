@@ -1,22 +1,28 @@
 # Requestador #
 This is under development and in no way ready for production yet.
 
-##### HTTP / SOCKET / STOMP mediator #####
+
+You could call it a relay, or a hub or whatever.
+##### HTTP / SOCKET / (activemq) STOMP mediator #####
+
+More info about
+* STOMP http://stomp.github.io/
+* SOCKET https://github.com/socketio/socket.io
+* HTTP (POSt + GET)
+
 
 ## Installation ##
-npm install
-
-configure settings in data/config.ini
+* npm install
+* configure settings in data/config.ini
 
 ## Run ##
-node index.js (for socket + web)
-
-node amq.js (for stomp listening)
+* node index.js (for socket + web)
+* node amq.js (for stomp listening)
 
 ## Intro ##
 Sometimes you need POSTs to be GET's, GEt's to become POST's or
 either one of the to become PUSH on socket.
-Listen to An apache MQ queue and on event push data to POSt?
+Listen to An apache MQ queue and on event push data to POST?
 This is what Requestador does for you.
 
 ## Listeners ##
