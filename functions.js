@@ -10,7 +10,10 @@ var executeSender = function(req, sender, body){
         module.exports.executeSenderHTTP(req, sender);
     }
     if (sender.type == 'SOCKET') {
-        module.exports.executeSenderSocket(req, sender, body);
+        module.exports.executeSenderSOCKET(req, sender, body);
+    }
+    if (sender.type == 'AMQP') {
+        module.exports.executeSenderAMQP(req, sender, body);
     }
 }
 
@@ -64,7 +67,20 @@ var executeSenderHTTP = function(req, sender, body){
 /**
  * Do socket sending
  */
-var executeSenderSocket = function(req, sender, body){
+var executeSenderAMQP = function(req, sender, body){
+    if (config.amq.useamq) {
+        console.log('[AMQ] execute socket ', sender.url);
+        if (typeof global.socket != 'undefined') {
+            console.log('[AMQP] pushed');
+        }
+    }else{
+        console.log('[AMQ] disabled in config');
+    }
+}
+/**
+ * Do socket sending
+ */
+var executeSenderSOCKET = function(req, sender, body){
     console.log('[SOCKET] execute socket ', sender.url);
     if (typeof global.socket != 'undefined') {
         global.socket.emit(sender.url, body);
@@ -137,7 +153,8 @@ var serveStatic = function(req,res){
 
 
 module.exports = {
-  executeSenderSocket: executeSenderSocket,
+  executeSenderAMQP: executeSenderAMQP,
+  executeSenderSOCKET: executeSenderSOCKET,
   executeSenderHTTP: executeSenderHTTP,
   loopListeners: loopListeners,
   executeSender: executeSender,

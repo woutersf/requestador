@@ -4,10 +4,10 @@ var functions = require('./functions');
 var data = require('./data');
 var http = require('http');
 var request = require('request');
-fs = require('fs');
+var fs = require('fs');
 var mime = require('mime');
 var qs = require('querystring');
-var Stomp = require('stomp-client');
+var amqp = require('amqp');
 var config = ini.parse(fs.readFileSync('./data/config.ini', 'utf-8'));
 
 

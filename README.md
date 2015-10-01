@@ -3,7 +3,7 @@ This is under development and in no way ready for production yet.
 
 
 You could call it a relay, or a hub or whatever.
-##### HTTP / SOCKET / (activemq) STOMP mediator #####
+##### HTTP / SOCKET / (rabbitMQ) STOMP mediator #####
 
 More info about
 * STOMP http://stomp.github.io/
@@ -22,7 +22,7 @@ More info about
 ## Intro ##
 Sometimes you need POSTs to be GET's, GEt's to become POST's or
 either one of the to become PUSH on socket.
-Listen to An apache MQ queue and on event push data to POST?
+Listen to An rabbitMQ queue and on event push data to POST?
 This is what Requestador does for you.
 
 ## Listeners ##
