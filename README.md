@@ -31,7 +31,7 @@ The formatting of this file is like this:
 name | method | uri | senders_csv
 
 * name: a unique identifier for a listener
-* method:  POST/GET/SOCKET/AMQ
+* method:  POST/GET/SOCKET/AMQP
 * uri: The socket channel "testchannel" or a certain uri "/testuri" on the current domain.
 * senders_csv: a comma separated list of SENDER ID's.
 
@@ -41,7 +41,7 @@ The formatting of this file is like this:
 
 name | method | url | data
 * name: A unique name for this sender
-* method: POST/GET/SOCKET/AMQ
+* method: POST/GET/SOCKET/AMQP
 * url: the full url to POST/GET to or the channel to SOCKET/AMQ to
 e.g. "tstchannel" or "http://mydomain/url/to_/post/to"
 * data: Allowerd datatypes: forward (forward postbody or socket msg) empty or fixed
