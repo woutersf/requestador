@@ -3,10 +3,9 @@ This is under development and in no way ready for production yet.
 
 
 You could call it a relay, or a hub or whatever.
-##### HTTP / SOCKET / (rabbitMQ) STOMP mediator #####
+##### HTTP / SOCKET / (rabbitMQ) amqp mediator #####
 
 More info about
-* STOMP http://stomp.github.io/
 * SOCKET https://github.com/socketio/socket.io
 * HTTP (POSt + GET)
 
@@ -17,7 +16,7 @@ More info about
 
 ## Run ##
 * node index.js (for socket + web)
-* node amq.js (for stomp listening)
+* node amq.js (for amqp listening)
 
 ## Intro ##
 Sometimes you need POSTs to be GET's, GEt's to become POST's or
