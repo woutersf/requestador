@@ -2,36 +2,44 @@
 /**
  * Do sending
  */
-var executeSender = function(req, sender, body){
+var executeSender = function(req, sender, body, headers){
     if (sender.type == 'POST') {
-        module.exports.executeSenderHTTP(req, sender, body);
+        module.exports.executeSenderHTTP(req, sender, body, headers);
     }
     if (sender.type == 'GET') {
-        module.exports.executeSenderHTTP(req, sender);
+        module.exports.executeSenderHTTP(req, sender, headers);
     }
     if (sender.type == 'SOCKET') {
-        module.exports.executeSenderSOCKET(req, sender, body);
+        module.exports.executeSenderSOCKET(req, sender, body, headers);
     }
     if (sender.type == 'AMQP') {
-        module.exports.executeSenderAMQP(req, sender, body);
+        module.exports.executeSenderAMQP(req, sender, body, headers);
     }
 }
 
 /**
  * Do HTTP POST sending
  */
-var executeSenderHTTP = function(req, sender, body){
+var executeSenderHTTP = function(req, sender, body, headers){
     var request = require('request');
     var querystring = require('querystring');
-    var headers = {
+    var PostHeaders = {
         'Content-Type':     'application/x-www-form-urlencoded',
     }
+    console.log('sender HTTP',headers);
+    for (var p in headers) {
+        if( headers.hasOwnProperty(p) ) {
+            //result += p + " , " + obj[p] + "\n";
+            console.log('foreach',p, headers[p]);
+            PostHeaders['Forwarded-header-' + p] = headers[p];
+        }
+    }
+    console.log('PostHeaders', PostHeaders);
     if (sender.type == 'POST') {
         //POST
         request.post({
-          headers: headers,
+          headers: PostHeaders,
           url:     sender.url,
-          headers: headers,
           body:    body
         }, function(error, response, body){
           if (!error && response.statusCode == 200) {
@@ -67,7 +75,7 @@ var executeSenderHTTP = function(req, sender, body){
 /**
  * Do socket sending
  */
-var executeSenderAMQP = function(req, sender, body){
+var executeSenderAMQP = function(req, sender, body, headers){
     if (config.amq.useamq) {
         console.log('[AMQ] execute socket ', sender.url);
         if (typeof global.socket != 'undefined') {
@@ -80,7 +88,7 @@ var executeSenderAMQP = function(req, sender, body){
 /**
  * Do socket sending
  */
-var executeSenderSOCKET = function(req, sender, body){
+var executeSenderSOCKET = function(req, sender, body, headers){
     console.log('[SOCKET] execute socket ', sender.url);
     if (typeof global.socket != 'undefined') {
         global.socket.emit(sender.url, body);
@@ -91,7 +99,7 @@ var executeSenderSOCKET = function(req, sender, body){
 /**
  * Loop listeners
  */
-var loopListeners = function(listeners, senders, req, method, uri, body){
+var loopListeners = function(listeners, senders, req, method, uri, body, headers){
     var ret = false;
     listeners.forEach(function(listener){
         if (listener.type == method && listener.url == uri)  {
@@ -99,7 +107,7 @@ var loopListeners = function(listeners, senders, req, method, uri, body){
                 senders.forEach(function(sender){
                     if (sender.name == senderName) {
                         console.log('[SENDER] matched ', senderName);
-                        module.exports.executeSender(req,sender, body);
+                        module.exports.executeSender(req,sender, body, headers);
                         ret =  true;
                     }
                 });

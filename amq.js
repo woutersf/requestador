@@ -56,15 +56,13 @@ if (config.amqp.useamq) {
                                     queue = q;
                                     queue.bind(config.amqp.exchange);
                                     subscribed.push(listener);
-                                    q.subscribe(function(message, headers, deliveryInfo) {
-
+                                    q.subscribe(function(message, headers, deliveryInfo, messageObject) {
                                         console.log('=============AMQ MESG================');
                                         console.log('[AMQ] [' + listener.url + ']received on Queue: ' );
-
                                         console.log('[AMQ] [headers]', headers );
                                         console.log('[AMQ] [deliveryInfo]', deliveryInfo );
                                         console.log('[AMQ] [message]', message.data.toString('utf-8') );
-                                        functions.loopListeners(listeners, senders, null, 'AMQP', listener.url, message.data.toString('utf-8'));
+                                        functions.loopListeners(listeners, senders, null, 'AMQP', listener.url, message.data.toString('utf-8'), headers);
                                     });
                                     console.log('[AMQP] listeners subscribed: ');
                                     console.log(subscribed);
