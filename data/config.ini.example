@@ -1,0 +1,24 @@
+;rename me to config.ini
+[amqp]
+useamq=true
+ip=127.0.0.1
+port=5672
+user=guest
+password=guest
+heartbeat=25
+vhost=/
+
+exchange=exchange.key
+
+[server]
+usesocketio=true
+ip=127.0.0.1
+port=3000
+
+
+[web]
+useweb=true
+ip=127.0.0.1
+port=3000
+
+
