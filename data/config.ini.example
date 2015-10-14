@@ -8,8 +8,6 @@ password=guest
 heartbeat=25
 vhost=/
 
-exchange=exchange.key
-
 [server]
 usesocketio=true
 ip=127.0.0.1

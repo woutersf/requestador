@@ -51,10 +51,12 @@ if (config.amqp.useamq) {
                                     autoDelete: false,
                                     durable: true,
                                 };
-                                amqpConnection.queue(listener.url, options, function(q) {
+                                var queueListener = listener.url.split(':');
+                                console.log(queueListener);
+                                amqpConnection.queue(queueListener[0], options, function(q) {
                                     console.log('[AMQP] queue created ', listener.url);
                                     queue = q;
-                                    queue.bind(config.amqp.exchange);
+                                    queue.bind(queueListener[1]);
                                     subscribed.push(listener);
                                     q.subscribe(function(message, headers, deliveryInfo, messageObject) {
                                         console.log('=============AMQ MESG================');
