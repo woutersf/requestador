@@ -9,8 +9,20 @@ var mime = require('mime');
 var qs = require('querystring');
 var amqp = require('amqp');
 var config = ini.parse(fs.readFileSync('./data/config.ini', 'utf-8'));
+var util = require('util');
 
 
+var log_file = fs.createWriteStream(__dirname + config.log.logFile, {flags : 'w'});
+var log_stdout = process.stdout;
+
+console.log = function(d) { //
+    if (config.log.logToFile) {
+        log_file.write(util.format(d) + '\n');
+    }
+    if (config.log.logToConsole) {
+        log_stdout.write(util.format(d) + '\n');
+    }
+};
 
 
 //////////////////    WEB   //////////////////////

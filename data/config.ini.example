@@ -20,3 +20,7 @@ ip=127.0.0.1
 port=3000
 
 
+[log]
+logFile=debug.log
+logToFile=true
+logToConsole=true
