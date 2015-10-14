@@ -1,3 +1,4 @@
+;rename me to listeners.inc
 HANDLEPOST|POST|/test|DOPOST,DOGET1,DOSOCK2
 HANDLEPOSTLOOP|POST|/testpostloop|DOGET1
 HANDLEGET|GET|/song/play|DOPOST

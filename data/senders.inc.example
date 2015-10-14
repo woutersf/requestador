@@ -1,3 +1,4 @@
+;rename me to senders.inc
 DOPOST|POST|http://mnm.frontend.local/submit.php|forward
 DOGET1|GET|http://mnm.frontend.local/submit.php|forward
 DOGET2|GET|http://127.0.0.1:8080/test|empty
