@@ -1,0 +1,122 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Requestador by wouters-frederik</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Requestador</h1>
+        <p>Relay between AMQP/HTTP/Socket</p>
+
+        <p class="view"><a href="https://github.com/wouters-frederik/requestador">View the Project on GitHub <small>wouters-frederik/requestador</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/wouters-frederik/requestador/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/wouters-frederik/requestador/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/wouters-frederik/requestador">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="requestador" class="anchor" href="#requestador" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requestador</h1>
+
+<p>This is under development and in no way ready for production yet.</p>
+
+<p>You could call it a relay, or a hub or whatever.</p>
+
+<h5>
+<a id="http--socket--rabbitmq-amqp-mediator" class="anchor" href="#http--socket--rabbitmq-amqp-mediator" aria-hidden="true"><span class="octicon octicon-link"></span></a>HTTP / SOCKET / (rabbitMQ) amqp mediator</h5>
+
+<p>More info about</p>
+
+<ul>
+<li>SOCKET <a href="https://github.com/socketio/socket.io">https://github.com/socketio/socket.io</a>
+</li>
+<li>HTTP (POSt + GET)</li>
+</ul>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<ul>
+<li>npm install</li>
+<li>configure settings in data/config.ini</li>
+</ul>
+
+<h2>
+<a id="run" class="anchor" href="#run" aria-hidden="true"><span class="octicon octicon-link"></span></a>Run</h2>
+
+<ul>
+<li>node index.js (for socket + web)</li>
+<li>node amq.js (for amqp listening)</li>
+</ul>
+
+<h2>
+<a id="intro" class="anchor" href="#intro" aria-hidden="true"><span class="octicon octicon-link"></span></a>Intro</h2>
+
+<p>Sometimes you need POSTs to be GET's, GEt's to become POST's or
+either one of the to become PUSH on socket.
+Listen to An rabbit queue and on event push data to POST?
+This is what Requestador does for you.</p>
+
+<h2>
+<a id="listeners" class="anchor" href="#listeners" aria-hidden="true"><span class="octicon octicon-link"></span></a>Listeners</h2>
+
+<p>Listeners are configured in listeners.inc
+The formatting of this file is like this:</p>
+
+<p>name | method | uri | senders_csv</p>
+
+<ul>
+<li>name: a unique identifier for a listener</li>
+<li>method:  POST/GET/SOCKET/AMQP</li>
+<li>uri: The socket channel "testchannel" or a certain uri "/testuri" on the current domain.</li>
+<li>senders_csv: a comma separated list of SENDER ID's.</li>
+</ul>
+
+<h2>
+<a id="senders" class="anchor" href="#senders" aria-hidden="true"><span class="octicon octicon-link"></span></a>Senders</h2>
+
+<p>Senders are configured in senders.inc
+The formatting of this file is like this:</p>
+
+<p>name | method | url | data</p>
+
+<ul>
+<li>name: A unique name for this sender</li>
+<li>method: POST/GET/SOCKET/AMQP</li>
+<li>url: the full url to POST/GET to or the channel to SOCKET/AMQ to
+e.g. "tstchannel" or "http://mydomain/url/to_/post/to"</li>
+<li>data: Allowerd datatypes: forward (forward postbody or socket msg) empty or fixed</li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/wouters-frederik">wouters-frederik</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-68913912-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
