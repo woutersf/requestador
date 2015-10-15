@@ -1,28 +1,55 @@
 # Requestador #
-This is under development , not for production yet.
 
+## Intro ##
+Sometimes you need POSTs to be GET's, POST to becom seocket messages or
+just listen on an amqp queue an put that stuff out there (POST/GET/socket)
+
+This is what Requestador does for you.
 
 You could call it a relay, or a hub or whatever.
-##### HTTP / SOCKET / (rabbitMQ) amqp mediator #####
 
-More info about
-* SOCKET https://github.com/socketio/socket.io
-* HTTP (POSt + GET)
-
+HTTP / SOCKET / (rabbitMQ) amqp mediator
 
 ## Installation ##
 * npm install
 * configure settings in data/config.ini
 
-## Run ##
-* node index.js (for socket + web)
-* node amq.js (for amqp listening)
+## configuration ##
+rename your config.ini.example to config.ini and set your settings.
 
-## Intro ##
-Sometimes you need POSTs to be GET's, GEt's to become POST's or
-either one of the to become PUSH on socket.
-Listen to An rabbit queue and on event push data to POST?
-This is what Requestador does for you.
+Section of AMQP settings
+* [amqp]
+* useamq=true
+* ip=127.0.0.1
+* port=5672
+* user=guest
+* password=guest
+* heartbeat=25
+* vhost=/
+
+Section of socket settings
+* [server]
+* usesocketio=true
+* ip=127.0.0.1
+* port=3000
+
+Section of Webserver settings
+* [web]
+* useweb=true
+* ip=127.0.0.1
+* port=3000
+
+
+Section of Logging settings
+* [log]
+* logFile=debug.log
+* logToFile=true
+* logToConsole=true
+
+## Run ##
+* node server.js
+
+connects to amqp , creates webserver, and socket server
 
 ## Listeners ##
 Listeners are configured in listeners.inc
@@ -33,7 +60,9 @@ name | method | uri | senders_csv
 * name: a unique identifier for a listener
 * method:  POST/GET/SOCKET/AMQP
 * uri: The socket channel "testchannel" or a certain uri "/testuri" on the current domain.
-* senders_csv: a comma separated list of SENDER ID's.
+  * foramqp this is in the format "QUEUE:key:exchange"
+  * e.g. /queue/someQueueName:#.be.test.key:requestador.topic
+* senders: a comma separated list of SENDER NAMES eg(DOPOST,DOSOCKET,DOAMQP).
 
 ## Senders ##
 Senders are configured in senders.inc
