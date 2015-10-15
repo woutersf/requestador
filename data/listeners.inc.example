@@ -1,9 +1,18 @@
 ;rename me to listeners.inc
-HANDLEPOST|POST|/test|DOPOST,DOGET1,DOSOCK2
-HANDLEPOSTLOOP|POST|/testpostloop|DOGET1
-HANDLEGET|GET|/song/play|DOPOST
-HANDLEGET|GET|/test|DOPOST,DOGET2,DOSOCK2,DOSOCK3
-HANDLESOCKET|SOCKET|test|DOPOSTLOOP
-HANDLEAMQ|AMQP|/queue/someQueueName:#.be.test.key:requestador.topic|DOSOCK,DOGET1,DOPOST
-HANDLEAMQTEST|AMQP|/queue/mediazone:#.be.test2.key:requestador.topic|DOPOST
-
+;HANDLEAMQ|AMQP|/queue/testCanvasQueue:#.key.be:requestador.topic|DOPOST,DOSOCK2
+POSTTOSOCK|POST|/tosock|DOSOCK2
+POSTTOPOST|POST|/topost|DOPOST
+POSTTOAMQP|POST|/toamqp|DOAMQP
+POSTTOGET|POST|/toget|DOGET
+GETTOSOCK|GET|/tosock|DOSOCK2
+GETTOPOST|GET|/topost|DOPOST
+GETTOAMQP|GET|/toamqp|DOAMQP
+GETTOGET|GET|/toget|DOGET
+SOCKTOPOST|SOCKET|topost|DOPOST
+SOCKTOGET|SOCKET|toget|DOGET
+SOCKTOSOCK|SOCKET|tosocket|DOSOCK2
+SOCKTOAMQP|SOCKET|toamqp|DOAMQP
+AMQPTOPOST|AMQP|/queue/testToPost:#.key.be:requestador.topic|DOPOST
+AMQPTOGET|AMQP|/queue/testToget:#.key.be:requestador.topic|DOGET
+AMQPTOSOCK|AMQP|/queue/testToSocket:#.key.be:requestador.topic|DOSOCK2
+AMQPTOAMQP|AMQP|/queue/testToAmqp:#.key.be:requestador.topic|DOAMQP

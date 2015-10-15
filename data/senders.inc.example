@@ -1,7 +1,5 @@
 ;rename me to senders.inc
-DOPOST|POST|http://mnm.frontend.local/submit.php|forward
-DOGET1|GET|http://mnm.frontend.local/submit.php|forward
-DOGET2|GET|http://127.0.0.1:8080/test|empty
-DOSOCK2|SOCKET|testchannel1|empty
-DOSOCK3|SOCKET|testchannel2|empty
-DOPOSTLOOP|POST|http://mnm.frontend.local/submit.php|forward
+DOPOST|POST|http://customdomain.dev/submit.php|forward
+DOGET|GET|http://customdomain.dev/submit.php|forward
+DOSOCK2|SOCKET|testchannel1|forward
+DOAMQP|AMQP|/queue/testToAmqp:#.key.be:requestador.topic|forward
