@@ -62,25 +62,34 @@ if (config.amqp.useamq) {
                             if (listener.type.toUpperCase() == 'AMQP') {
                                 var options = {
                                     autoDelete: false,
-                                    durable: true,
+                                    durable: false,
+                                    closeChannelOnUnsubscribe: true,
                                 };
                                 var queueListener = listener.url.split(':');
-                                console.log(queueListener);
+                                //console.log(queueListener);
                                 amqpConnection.queue(queueListener[0], options, function(q) {
                                     console.log('[AMQP] queue created ', listener.url);
-                                    queue = q;
-                                    queue.bind(queueListener[1]);
-                                    subscribed.push(listener);
-                                    q.subscribe(function(message, headers, deliveryInfo, messageObject) {
-                                        console.log('=============AMQ MESG================');
-                                        console.log('[AMQ] [' + listener.url + ']received on Queue: ' );
-                                        console.log('[AMQ] [headers]', headers );
-                                        console.log('[AMQ] [deliveryInfo]', deliveryInfo );
-                                        console.log('[AMQ] [message]', message.data.toString('utf-8') );
-                                        functions.loopListeners(listeners, senders, null, 'AMQP', listener.url, message.data.toString('utf-8'), headers);
+                                    var exchangeOptions = {
+                                        type: 'topic', //'direct', 'fanout'
+                                    };
+                                    console.log('[AMQP] creating exchange ', queueListener[2], exchangeOptions);
+                                    amqpConnection.exchange(queueListener[2], exchangeOptions, function(exchange){
+                                        console.log('[AMQP] exchange created ', queueListener[2]);
+                                        queue = q;
+                                        queue.bind(exchange, queueListener[1]);
+                                        subscribed.push(listener);
+                                        q.subscribe(function(message, headers, deliveryInfo, messageObject) {
+                                            console.log('=============AMQ MESG================');
+                                            console.log('[AMQ] [' + listener.url + ']received on Queue: ' );
+                                            console.log('[AMQ] [headers]', headers );
+                                            console.log('[AMQ] [deliveryInfo]', deliveryInfo );
+                                            console.log('[AMQ] [message]', message.data.toString('utf-8') );
+                                            functions.loopListeners(listeners, senders, null, 'AMQP', listener.url, message.data.toString('utf-8'), headers);
+                                        });
+                                        console.log('[AMQP] listeners subscribed: ');
+                                        console.log(subscribed);
                                     });
-                                    console.log('[AMQP] listeners subscribed: ');
-                                    console.log(subscribed);
+
                                 });
                             }
                         });

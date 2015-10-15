@@ -4,6 +4,6 @@ HANDLEPOSTLOOP|POST|/testpostloop|DOGET1
 HANDLEGET|GET|/song/play|DOPOST
 HANDLEGET|GET|/test|DOPOST,DOGET2,DOSOCK2,DOSOCK3
 HANDLESOCKET|SOCKET|test|DOPOSTLOOP
-HANDLEAMQ|AMQP|/queue/someQueueName:exchange.key|DOSOCK,DOGET1,DOPOST
-HANDLEAMQTEST|AMQP|/queue/mediazone:exchange.key|DOPOST
+HANDLEAMQ|AMQP|/queue/someQueueName:#.be.test.key:requestador.topic|DOSOCK,DOGET1,DOPOST
+HANDLEAMQTEST|AMQP|/queue/mediazone:#.be.test2.key:requestador.topic|DOPOST
 
