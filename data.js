@@ -8,7 +8,7 @@ var getListeners = function(callback){
     var items = data.split('\n');
     items.forEach(function(line){
       var parts = line.split('|');
-      if (parts.length > 1) {
+      if (parts.length > 1 && line[0] != ';') {
         if (typeof parts[3] != 'undefined' && parts[3].indexOf(",")!=-1 ) {
           senderList = parts[3].split(',');
         }else{
@@ -29,7 +29,6 @@ var getListeners = function(callback){
     callback(listeners);
   });
   //return listeners;
-
 }
 
 
@@ -43,7 +42,7 @@ var getSenders = function(callback){
     var items = data.split('\n');
     items.forEach(function(line){
       var parts = line.split('|');
-      if (parts.length > 0) {
+      if (parts.length > 0 && line[0] != ';') {
         var sender = {
           name: parts[0],
           type: parts[1],

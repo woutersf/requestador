@@ -151,6 +151,9 @@ body {
               <div class="row toggled" id="socket">
                   <h1>test socket event</h1>
                   <form method="POST"  id="socketTest">
+                  <div class="input-group">
+                  Channel: <input type="text" name="channel" id="channel" value="test">
+                  </div>
                   Json:
                   <div class="input-group">
                     <textarea name="message" id="message" style="width:300px;height:100px;">{foo:'barf'}</textarea>
@@ -187,7 +190,8 @@ body {
                 $('#socketTest').submit(function(){
                   console.log('Push test to socket');
                   var $input = $('#message').val();
-                  socket.emit('test', $input);
+                  var $channel = $('#channel').val();
+                  socket.emit($channel, $input);
                   //$('#m').val('');
                   return false;
                 });

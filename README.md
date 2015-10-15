@@ -1,5 +1,5 @@
 # Requestador #
-This is under development and in no way ready for production yet.
+This is under development , not for production yet.
 
 
 You could call it a relay, or a hub or whatever.
