@@ -43,12 +43,13 @@ if (config.amqp.useamq) {
         };
 
         amqpConnection = amqp.createConnection(connOptions, { reconnectBackoffStrategy : "exponential" });
-
+        global.amqpConnection = amqpConnection;
         //events
         //connect/data/error/ready/end
 
         amqpConnection.on('error', function(err) {
-            console.log('[AMQP] error ',err);
+            console.log('[AMQP] error ');
+            console.log(err);
         });
         amqpConnection.on('end', function() {
             console.log('[AMQP] ended ');
@@ -65,19 +66,18 @@ if (config.amqp.useamq) {
                                     durable: false,
                                     closeChannelOnUnsubscribe: true,
                                 };
-                                var queueListener = listener.url.split(':');
-                                //console.log(queueListener);
-                                amqpConnection.queue(queueListener[0], options, function(q) {
-                                    console.log('[AMQP] queue created ', listener.url);
+
+                                amqpConnection.queue(listener.queue, options, function(q) {
+                                    console.log('[AMQP] queue created ', listener.queue);
                                     var exchangeOptions = {
                                         type: 'topic', //'direct', 'fanout'
                                     };
-                                    console.log('[AMQP] creating exchange ', queueListener[2], exchangeOptions);
-                                    amqpConnection.exchange(queueListener[2], exchangeOptions, function(exchange){
-                                        console.log('[AMQP] exchange created ', queueListener[2]);
+                                    console.log('[AMQP] creating exchange ', listener.exchange, exchangeOptions);
+                                    amqpConnection.exchange(listener.exchange, exchangeOptions, function(exchange){
+                                        console.log('[AMQP] exchange created ', listener.exchange);
                                         queue = q;
-                                        queue.bind(exchange, queueListener[1]);
-                                        subscribed.push(listener);
+                                        queue.bind(exchange, listener.key);
+                                        //subscribed.push(listener);
                                         q.subscribe(function(message, headers, deliveryInfo, messageObject) {
                                             console.log('=============AMQ MESG================');
                                             console.log('[AMQ] [' + listener.url + ']received on Queue: ' );
@@ -87,7 +87,7 @@ if (config.amqp.useamq) {
                                             functions.loopListeners(listeners, senders, null, 'AMQP', listener.url, message.data.toString('utf-8'), headers);
                                         });
                                         console.log('[AMQP] listeners subscribed: ');
-                                        console.log(subscribed);
+                                        //console.log(subscribed);
                                     });
 
                                 });

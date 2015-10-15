@@ -20,6 +20,12 @@ var getListeners = function(callback){
           url: parts[2],
           senders: senderList,
         };
+        if (listener.type == 'AMQP') {
+          var amqpParts = parts[2].split(':');
+          listener.queue = amqpParts[0];
+          listener.key = amqpParts[1];
+          listener.exchange = amqpParts[2];
+        }
         listeners.push(listener);
       }
     });
@@ -49,6 +55,12 @@ var getSenders = function(callback){
           url: parts[2],
           dataType: parts[3],
         };
+        if (sender.type == 'AMQP') {
+          var amqpParts = parts[2].split(':');
+          sender.queue = amqpParts[0];
+          sender.key = amqpParts[1];
+          sender.exchange = amqpParts[2];
+        }
         senders.push(sender);
       }
     });

@@ -72,17 +72,41 @@ var executeSenderHTTP = function(req, sender, body, headers){
     }
 }
 
+
 /**
- * Do socket sending
+ * Do AMQP sending
  */
 var executeSenderAMQP = function(req, sender, body, headers){
-    if (config.amq.useamq) {
-        console.log('[AMQ] execute socket ', sender.url);
-        if (typeof global.socket != 'undefined') {
-            console.log('[AMQP] pushed');
-        }
-    }else{
-        console.log('[AMQ] disabled in config');
+    console.log('[AMQP] send to queue ', sender, body, headers);
+    console.log(sender);
+    console.log(body);
+    console.log(headers);
+    //var senderParts =
+    var body = 'testbody';
+    if (typeof global.amqpConnection != 'undefined') {
+        //amqpConnection.
+        console.log('[AMQP] connected');
+        var queueOptions = {
+            autoDelete: false,
+            durable: false,
+            closeChannelOnUnsubscribe: true,
+        };
+        global.amqpConnection.queue(sender.queue, queueOptions, function(q) {
+            var exchangeOptions = {
+                type: 'topic', //'direct', 'fanout'
+            };
+            global.amqpConnection.exchange(sender.exchange, exchangeOptions, function(exchange){
+                console.log('[AMQP] exchange created ', sender.exchange);
+                queue = q;
+                queue.bind(exchange, sender.key);
+                console.log('[AMQP] exchange added to queue ', sender.exchange, sender.queue);
+                var options = {};
+                options.headers = {};
+                exchange.publish(sender.key, body, options, function(){
+                    console.log('[AMQP] Published to Exchange ' + exchange.name + ' message:', body);
+                })
+            });
+        });
     }
 }
 /**
@@ -107,7 +131,7 @@ var loopListeners = function(listeners, senders, req, method, uri, body, headers
                 senders.forEach(function(sender){
                     if (sender.name == senderName) {
                         console.log('[SENDER] matched ', senderName);
-                        module.exports.executeSender(req,sender, body, headers);
+                        module.exports.executeSender(req, sender, body, headers);
                         ret =  true;
                     }
                 });
