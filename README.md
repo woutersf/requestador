@@ -21,7 +21,7 @@ More info about
 ## Intro ##
 Sometimes you need POSTs to be GET's, GEt's to become POST's or
 either one of the to become PUSH on socket.
-Listen to An rabbitMQ queue and on event push data to POST?
+Listen to An rabbit queue and on event push data to POST?
 This is what Requestador does for you.
 
 ## Listeners ##
