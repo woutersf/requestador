@@ -77,6 +77,10 @@ var executeSenderHTTP = function(req, sender, body, headers){
  * Do AMQP sending
  */
 var executeSenderAMQP = function(req, sender, body, headers){
+    if (!global.config.amqp.useamq) {
+        console.log('[AMQP] AMQP is disabled');
+        return false;
+    }
     console.log('[AMQP] send to queue ', sender, body, headers);
     console.log(sender);
     console.log(body);
@@ -113,6 +117,10 @@ var executeSenderAMQP = function(req, sender, body, headers){
  * Do socket sending
  */
 var executeSenderSOCKET = function(req, sender, body, headers){
+    if (!global.config.server.usesocketio) {
+        console.log('[SOCKET] SOCKET is disabled');
+        return false;
+    }
     console.log('[SOCKET] execute socket ', sender.url);
     if (typeof global.socket != 'undefined') {
         global.socket.emit(sender.url, body);
@@ -172,6 +180,7 @@ var serveStatic = function(req,res){
         console.log(file);
     }
     if (path.existsSync(file)) {
+        var fs = require('fs');
         var html = fs.readFileSync(file);
         var mime = require('mime')
         var mimetype = mime.lookup(file);

@@ -1,14 +1,18 @@
 var ini = require('ini')
-var functions = require('./functions');
-var data = require('./data');
+var fs = require('fs');
 var http = require('http');
 var request = require('request');
-var fs = require('fs');
 var mime = require('mime');
 var qs = require('querystring');
 var amqp = require('amqp');
-var config = ini.parse(fs.readFileSync('./data/config.ini', 'utf-8'));
 var util = require('util');
+
+var functions = require('./functions');
+var data = require('./data');
+
+var config = ini.parse(fs.readFileSync('./data/config.ini', 'utf-8'));
+global.config = config;
+
 
 var log_file = fs.createWriteStream(__dirname + config.log.logFile, {flags : 'w'});
 var log_stdout = process.stdout;
