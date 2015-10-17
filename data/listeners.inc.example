@@ -1,5 +1,4 @@
 ;rename me to listeners.inc
-;HANDLEAMQ|AMQP|/queue/testCanvasQueue:#.key.be:requestador.topic|DOPOST,DOSOCK2
 POSTTOSOCK|POST|/tosock|DOSOCK2
 POSTTOPOST|POST|/topost|DOPOST
 POSTTOAMQP|POST|/toamqp|DOAMQP
