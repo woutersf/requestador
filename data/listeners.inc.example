@@ -11,7 +11,8 @@ SOCKTOPOST|SOCKET|topost|DOPOST
 SOCKTOGET|SOCKET|toget|DOGET
 SOCKTOSOCK|SOCKET|tosocket|DOSOCK2
 SOCKTOAMQP|SOCKET|toamqp|DOAMQP
-AMQPTOPOST|AMQP|/queue/testToPost:#.key.be:requestador.topic|DOPOST
-AMQPTOGET|AMQP|/queue/testToget:#.key.be:requestador.topic|DOGET
-AMQPTOSOCK|AMQP|/queue/testToSocket:#.key.be:requestador.topic|DOSOCK2
-AMQPTOAMQP|AMQP|/queue/testToAmqp:#.key.be:requestador.topic|DOAMQP
+AMQPTOPOST|AMQP|/queue/testToPost:#toPost.key.be:post.topic|DOPOST
+AMQPTOGET|AMQP|/queue/testToget:#toget.key.be:get.topic|DOGET
+AMQPTOSOCK|AMQP|/queue/testToSocket:#tosocket.key.be:socket.topic|DOSOCK2
+AMQPTOAMQP|AMQP|/queue/testToAmqp:#toamqp.key.be:amqp.topic|DOAMQP
+

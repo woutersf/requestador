@@ -2,4 +2,4 @@
 DOPOST|POST|http://customdomain.dev/submit.php|forward
 DOGET|GET|http://customdomain.dev/submit.php|forward
 DOSOCK2|SOCKET|testchannel1|forward
-DOAMQP|AMQP|/queue/testToAmqp:#.key.be:requestador.topic|forward
+DOAMQP|AMQP|/queue/testCanvasQueue:#toPost.key.be:post.topic|forward
