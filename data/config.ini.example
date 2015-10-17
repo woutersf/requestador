@@ -19,8 +19,19 @@ useweb=true
 ip=127.0.0.1
 port=3000
 
-
 [log]
 logFile=debug.log
 logToFile=true
 logToConsole=true
+
+
+[monitor]
+active=true
+sendmail=true
+polltimeout=1
+monitorMailFrom=monitor@requestador.com
+monitorMailTo=myEmailadress@domain.com
+monitorMailSubject=There is A problem!
+sendmailPath=/usr/sbin/sendmail
+sendmailArgs= -t -f myEmailadress@domain.com
+

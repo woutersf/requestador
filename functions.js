@@ -68,7 +68,7 @@ var executeSenderHTTP = function(req, sender, body, headers){
                 console.log('[GETREQUEST] request returned NOK: ' , error);
                 //console.log(body);
             }
-        })
+        });
     }
 }
 
