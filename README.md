@@ -74,3 +74,8 @@ name | method | url | data
 * url: the full url to POST/GET to or the channel to SOCKET/AMQ to
 e.g. "tstchannel" or "http://mydomain/url/to_/post/to"
 * data: Allowerd datatypes: forward (forward postbody or socket msg) empty or fixed
+
+## monitoring
+It's best to connect Nagios to the polling path of the server: "/requestadorPoll"
+If you dont have that, you can run "node monitor.js" This script will alert you via email if the servers stops running.
+It's best to configure (and test) your monitoring in config.ini before you use it in production.

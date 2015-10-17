@@ -1,3 +1,7 @@
+// ITS BETTER TO CONNECT NAGIOS TO YOUR SERVER VIA THE /requestadorPoll path.
+// IF you do that, no need to run this.
+//
+
 var ini = require('ini')
 var fs = require('fs');
 var http = require('http');
