@@ -75,7 +75,7 @@ name | method | url | data
 e.g. "tstchannel" or "http://mydomain/url/to_/post/to"
 * data: Allowerd datatypes: forward (forward postbody or socket msg) empty or fixed
 
-## monitoring
+## Monitoring
 It's best to connect Nagios to the polling path of the server: "/requestadorPoll"
 If you dont have that, you can run "node monitor.js" This script will alert you via email if the servers stops running.
 It's best to configure (and test) your monitoring in config.ini before you use it in production.
