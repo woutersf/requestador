@@ -46,6 +46,20 @@ Section of Logging settings
 * logToFile=true
 * logToConsole=true
 
+Section of Monitoring settings
+* [monitor]
+* logFile=monitor.log
+* active=true
+* sendmail=true
+* polltimeout=3000 (milliseconds)
+* monitorMailFrom=monitor@requestador.com
+* monitorMailTo=woutersf@gmail.com
+* monitorMailSubject=Er was een probleem
+* sendmailPath=/usr/sbin/sendmail
+* sendmailArgs= -t -f woutersf@gmail.com
+
+
+
 ## Run ##
 * node server.js
 

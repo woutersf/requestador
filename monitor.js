@@ -83,7 +83,7 @@ function doLoop(){
   setTimeout(function() {
       doRequest();
       doLoop();
-  }, 3000);
+  }, global.config.monitor.polltimeout);
 }
 
 /**
