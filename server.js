@@ -120,13 +120,16 @@ var server = http.createServer( function(req, res) {
     if (functions.requestIsStatic(req,res)) {
         functions.serveStatic(req,res);
     }
-    console.log('=============REQUEST================');
-    console.log(req.url);
     if (req.method == 'POST' && config.web.useweb) {
-        console.log("POST");
+        console.log('=============POST================');
+        console.log(req.url);
         var body = '';
         req.on('data', function (data) {
             body += data;
+            if (body.length > 1e6) {
+                // FLOOD ATTACK OR FAULTY CLIENT, NUKE REQUEST
+                request.connection.destroy();
+            }
         });
         req.on('end', function () {
             console.log("Body: " + body);
@@ -138,7 +141,7 @@ var server = http.createServer( function(req, res) {
                 });
 
             }else if (req.url == '/admin/listeners') {
-                console.log(req.body,body);
+                console.log(req);
                 console.log(qs.parse(req.body));
                 // functions.writeSettings(req, res, './data/listeners.inc', data, function(){
                 //     var html = fs.readFileSync('./html/saved.html');
@@ -168,8 +171,11 @@ var server = http.createServer( function(req, res) {
     }
     else if(req.method == 'GET' && config.web.useweb)
     {
-        console.log("GET");
-        if (req.url == '/admin') {
+        if (req.url == '/requestadorPoll') {
+            var newhtml = 'ok';
+            res.writeHead(200, {'Content-Type': 'text/html'});
+            res.end(newhtml);
+        }else if (req.url == '/admin') {
             var html = fs.readFileSync('./html/admin.html');
             html = html.toString();
             var listeners = fs.readFileSync('./data/listeners.inc' );
@@ -179,6 +185,8 @@ var server = http.createServer( function(req, res) {
             res.writeHead(200, {'Content-Type': 'text/html'});
             res.end(newhtml );
         }else{
+            console.log('=============GET================');
+            console.log(req.url);
             data.getSenders(function(senders){
                 data.getListeners(function(listeners){
                     var val = functions.loopListeners(listeners, senders, req, req.method, req.url, body);
