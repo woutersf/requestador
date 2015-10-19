@@ -69,30 +69,37 @@ if (config.amqp.useamq) {
                                     autoDelete: false,
                                     durable: false,
                                     closeChannelOnUnsubscribe: true,
+                                    noDeclare: true
                                 };
-
+                                console.log('[AMQP] queue:');
+                                console.log(listener.queue);
                                 amqpConnection.queue(listener.queue, options, function(q) {
                                     console.log('[AMQP] queue created ', listener.queue);
-                                    var exchangeOptions = {
-                                        type: 'topic', //'direct', 'fanout'
-                                    };
-                                    console.log('[AMQP] creating exchange ', listener.exchange, exchangeOptions);
-                                    amqpConnection.exchange(listener.exchange, exchangeOptions, function(exchange){
-                                        console.log('[AMQP] exchange created ', listener.exchange);
-                                        queue = q;
-                                        queue.bind(exchange, listener.key);
+                                    // var exchangeOptions = {
+                                    //     type: 'topic', //'direct', 'fanout'
+                                    // };
+                                    // console.log('[AMQP] creating exchange ', listener.exchange, exchangeOptions);
+                                    // amqpConnection.exchange(listener.exchange, exchangeOptions, function(exchange){
+                                        //console.log('[AMQP] exchange created ', listener.exchange);
+                                        //queue = q;
+                                        //queue.bind(exchange, listener.key);
                                         //subscribed.push(listener);
                                         q.subscribe(function(message, headers, deliveryInfo, messageObject) {
                                             console.log('=============AMQ MESG================');
                                             console.log('[AMQ] [' + listener.url + ']received on Queue: ' );
                                             console.log('[AMQ] [headers]', headers );
                                             console.log('[AMQ] [deliveryInfo]', deliveryInfo );
-                                            console.log('[AMQ] [message]', message.data.toString('utf-8') );
-                                            functions.loopListeners(listeners, senders, null, 'AMQP', listener.url, message.data.toString('utf-8'), headers);
+                                            console.log(typeof message);
+                                            if (typeof message  == 'object') {
+                                                var json = JSON.stringify(message)
+                                            }
+                                            console.log( message);
+                                            console.log( message.toString('utf-8'));
+                                            console.log('[AMQ] [message]', json );
+                                            functions.loopListeners(listeners, senders, null, 'AMQP', listener.url, json, headers);
                                         });
-                                        console.log('[AMQP] listeners subscribed: ');
                                         //console.log(subscribed);
-                                    });
+                                    //});Exchange
 
                                 });
                             }

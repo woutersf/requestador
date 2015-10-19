@@ -30,11 +30,9 @@ var executeSenderHTTP = function(req, sender, body, headers){
     for (var p in headers) {
         if( headers.hasOwnProperty(p) ) {
             //result += p + " , " + obj[p] + "\n";
-            console.log('foreach',p, headers[p]);
             PostHeaders['Forwarded-header-' + p] = headers[p];
         }
     }
-    console.log('PostHeaders', PostHeaders);
     if (sender.type == 'POST') {
         //POST
         request.post({
