@@ -178,11 +178,11 @@ var server = http.createServer( function(req, res) {
     }
     else if(req.method == 'GET' && config.web.useweb)
     {
-        if (req.url == '/requestadorPoll') {
+        if (req.url == global.config.web.webpollurl) {
             var newhtml = 'ok';
             res.writeHead(200, {'Content-Type': 'text/html'});
             res.end(newhtml);
-        }else if (req.url == '/admin') {
+        }else if (req.url == '/admin' && global.config.web.webadmin) {
             var html = fs.readFileSync('./html/admin.html');
             html = html.toString();
             var listeners = fs.readFileSync('./data/listeners.inc' );

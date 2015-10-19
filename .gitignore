@@ -29,5 +29,5 @@ node_modules
 data/config.ini
 data/listeners.inc
 data/senders.inc
-log/debug.log
+log/requestador.log
 log/monitor.log
