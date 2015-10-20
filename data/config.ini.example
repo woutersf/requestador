@@ -24,9 +24,9 @@ port=3000
 [log]
 :this is a path relative to the ROOT of the application
 logFile=/log/requestador.log
-
 logToFile=true
 logToConsole=true
+failedRequests=/log/failedRequests.log
 
 
 [monitor]
