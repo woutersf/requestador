@@ -1,3 +1,12 @@
+/**
+ * FailedRequests
+ */
+var failedRequest = function(content) {
+    var util = require('util');
+    var logfile = global.config.log.failedRequests;
+    var failed_file = fs.createWriteStream(__dirname + logfile, {flags : 'a'});
+    failed_file.write(util.format(content) + '\n');
+};
 
 /**
  * Do sending
@@ -35,36 +44,42 @@ var executeSenderHTTP = function(req, sender, body, headers){
     }
     if (sender.type == 'POST') {
         //POST
-        request.post({
+        var postObject = {
           headers: PostHeaders,
           url:     sender.url,
           body:    body
-        }, function(error, response, body){
+        };
+        request.post(postObject, function(error, response, body){
           if (!error && response.statusCode == 200) {
                 console.log('[POSTREQUEST] request returned OK');
                 console.log(body)
             } else {
                 console.log('[POSTREQUEST] request returned NOK: ' , error);
+                var postResultObject = postObject;
+                postResultObject.error = error;
+                failedRequest(JSON.stringify(postResultObject));
             }
         });
     }else{
 
         //GET
-        var options = {
+        var getObject = {
             url: sender.url,
             method: sender.type,
             headers: headers,
         }
 
         // Start the request
-        request(options, function (error, response, body) {
+        request(getObject, function (error, response, body) {
             if (!error && response.statusCode == 200) {
                 console.log('[GETREQUEST] request returned OK');
                 // Print out the response body
                 console.log(body)
             } else {
                 console.log('[GETREQUEST] request returned NOK: ' , error);
-                //console.log(body);
+                var getResultObject = getObject;
+                getResultObject.error = error;
+                failedRequest(JSON.stringify(getResultObject));
             }
         });
     }

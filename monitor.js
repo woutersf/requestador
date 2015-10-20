@@ -11,7 +11,7 @@ var util = require('util');
 var config = ini.parse(fs.readFileSync('./data/config.ini', 'utf-8'));
 global.config = config;
 
-var log_file = fs.createWriteStream(__dirname + config.monitor.logFile, {flags : 'w'});
+var log_file = fs.createWriteStream(__dirname + config.monitor.logFile, {flags : 'a'});
 var log_stdout = process.stdout;
 
 console.log = function(d) { //
