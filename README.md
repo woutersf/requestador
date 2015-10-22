@@ -1,7 +1,7 @@
 # Requestador #
 
 ## Intro ##
-Sometimes you need POSTs to be GET's, POST to becom seocket messages or
+Sometimes you need POSTs to be GET's, POST to become socket messages or
 just listen on an amqp queue an put that stuff out there (POST/GET/socket)
 
 This is what Requestador does for you.
