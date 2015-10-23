@@ -162,14 +162,19 @@ var loopListeners = function(listeners, senders, req, method, uri, body, headers
     return ret;
 }
 
-var writeSettings = function(req, res, file, data, callback){
+
+/**
+ * Write contents to a file.
+ */
+var writeSettings = function(file, data, callback){
     var fs = require('fs');
     fs.writeFile(file, data, function(err) {
-        if(err) {
-            return console.log(err);
+        if (err) {
+            console.log(err);
+            callback(err);
         }
-        callback();
         console.log("The file was saved!");
+        callback();
     });
 
 

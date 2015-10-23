@@ -50,7 +50,7 @@ body {
 }
         </style>
 
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -59,9 +59,9 @@ body {
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 
-    <script src="js/jquery-1.11.1.js"></script>
-    <script src="js/socket.io-1.2.0.js"></script>
-    <script src="js/bootstrap.min.js"></script>
+    <script src="/js/jquery-1.11.1.js"></script>
+    <script src="/js/socket.io-1.2.0.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
 
 </head>
 
@@ -124,10 +124,10 @@ body {
                   "<i>name | method | url | data</i>" <br>Allowerd datatypes: forward (forward postbody or socket msg) empty or fixed
                   <form method="POST" action="admin/senders">
                   <div class="input-group">
-                    <textarea  class="form-control" style="width:600px;height:400px;">{senders}</textarea><br>
+                    <textarea  name="senders" id="senders" class="form-control" style="width:600px;height:400px;">{senders}</textarea><br>
                   </div>
                   <div class="input-group">
-                    <input class="form-control btn btn-success" type="submit" value="Save"/>
+                    <input name="submit" id="submit" class="form-control btn btn-success" type="submit" value="Save"/>
                   </div>
                   </form>
               </div>
@@ -139,10 +139,10 @@ body {
                   "<i>name | method | uri | senders_csv</i>"
                   <form method="POST" action="admin/listeners">
                   <div class="input-group">
-                    <textarea  class="form-control" style="width:600px;height:400px;">{listeners}</textarea>
+                    <textarea    name="listeners" id="listeners"  class="form-control" style="width:600px;height:400px;">{listeners}</textarea>
                   </div>
                   <div class="input-group">
-                    <input class="form-control btn btn-success" type="submit" value="Save"/>
+                    <input name="submit" id="submit"   class="form-control btn btn-success" type="submit" value="Save"/>
                   </div>
                   </form>
               </div>
