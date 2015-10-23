@@ -7,6 +7,7 @@ var getListeners = function(callback){
   fs.readFile(file, 'utf8', function (err,data) {
     var items = data.split('\n');
     items.forEach(function(line){
+      line = line.replace(/\n$/, '').trim();
       var parts = line.split('|');
       if (parts.length > 1 && line[0] != ';') {
         if (typeof parts[3] != 'undefined' && parts[3].indexOf(",")!=-1 ) {
@@ -47,6 +48,7 @@ var getSenders = function(callback){
   fs.readFile(file, 'utf8', function (err,data) {
     var items = data.split('\n');
     items.forEach(function(line){
+      line = line.replace(/\n$/, '').trim();
       var parts = line.split('|');
       if (parts.length > 0 && line[0] != ';') {
         var sender = {

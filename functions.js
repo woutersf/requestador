@@ -35,7 +35,8 @@ var executeSenderHTTP = function(req, sender, body, headers){
     var PostHeaders = {
         'Content-Type':     'application/x-www-form-urlencoded',
     }
-    console.log('sender HTTP',headers);
+    console.log('[HTTP] sender HTTP');
+    console.log(sender);
     for (var p in headers) {
         if( headers.hasOwnProperty(p) ) {
             //result += p + " , " + obj[p] + "\n";
@@ -151,7 +152,6 @@ var loopListeners = function(listeners, senders, req, method, uri, body, headers
             listener.senders.forEach(function(senderName){
                 senders.forEach(function(sender){
                     if (sender.name == senderName) {
-                        console.log('[SENDER] matched ', senderName);
                         module.exports.executeSender(req, sender, body, headers);
                         ret =  true;
                     }
