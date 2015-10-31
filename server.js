@@ -1,4 +1,4 @@
-var ini = require('ini')
+var ini = require('ini');
 var fs = require('fs');
 var http = require('http');
 var request = require('request');
@@ -26,16 +26,6 @@ console.log = function(d) {
         log_stdout.write(util.format(d) + '\n');
     }
 };
-
-
-
-// UNhandled exceptions get written to the log.
-process.on('uncaughtException', function ( err ) {
-    console.log(new Error().stack);
-    console.log(err);
-    //hopefully do some logging.
-    process.exit(1);
-});
 
 
 // Test unhandled errors
@@ -239,7 +229,11 @@ if (config.server.usesocketio) {
                         socket.on(listener.url, function(msg){
                             console.log('=============SOCKET MESG================');
                             console.log('[IO] [' + listener.url + ']received on socket: ' , msg);
+                            if (msg=='die') {
+                                process.exit(1);
+                            }
                             functions.loopListeners(listeners, senders, null, 'SOCKET', listener.url, msg);
+
                         });
                     }
                 });

@@ -1,4 +1,7 @@
 ;rename me to config.ini
+[global]
+name=requestador
+
 [amqp]
 useamq=true
 ip=127.0.0.1
@@ -40,6 +43,11 @@ monitorMailTo=myEmailadress@domain.com
 monitorMailSubject=There is A problem!
 sendmailPath=/usr/sbin/sendmail
 sendmailArgs= -t -f myEmailadress@domain.com
+
+[autostart]
+smtphost=127.0.0.1
+smtpport=25
+ignore_tls=true
 
 [proxy]
 proxy_enabled=true

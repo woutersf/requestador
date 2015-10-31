@@ -51,7 +51,6 @@ Enable routing all outgoing requests through a proxy server.
 * proxy_port=3000
 
 
-
 Section of Logging settings
 * [log]
 * logFile=debug.log
@@ -73,7 +72,8 @@ Section of Monitoring settings
 
 
 ## Run ##
-* node server.js
+* node server.js Or if you want it running continuously (forever), and restart after craches
+* forever -c node server.js
 
 connects to amqp , creates webserver, and socket server
 
