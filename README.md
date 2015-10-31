@@ -14,6 +14,10 @@ HTTP / SOCKET / (rabbitMQ) amqp mediator
 * npm install
 * configure settings in data/config.ini
 
+## Requirements ##
+* are in package.json.
+* I run it on node v0.10.33, so anything more recent should work.
+
 ## Configuration ##
 rename your config.ini.example to config.ini and set your settings.
 
@@ -38,6 +42,14 @@ Section of Webserver settings
 * useweb=true
 * ip=127.0.0.1
 * port=3000
+
+Section of Proxy settings
+Enable routing all outgoing requests through a proxy server.
+* [proxy]
+* proxy_enabled=true
+* proxy_server=127.0.0.1
+* proxy_port=3000
+
 
 
 Section of Logging settings

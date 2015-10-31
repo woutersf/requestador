@@ -31,6 +31,10 @@ var executeSender = function(req, sender, body, headers){
  */
 var executeSenderHTTP = function(req, sender, body, headers){
     var request = require('request');
+    if (global.config.proxy.proxy_enabled) {
+        console.log('[HTTP] PROXY: ' + 'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port);
+        request = request.defaults({'proxy':'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port});
+    }
     var querystring = require('querystring');
     var PostHeaders = {
         'Content-Type':     'application/x-www-form-urlencoded',

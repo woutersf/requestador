@@ -41,3 +41,7 @@ monitorMailSubject=There is A problem!
 sendmailPath=/usr/sbin/sendmail
 sendmailArgs= -t -f myEmailadress@domain.com
 
+[proxy]
+proxy_enabled=true
+proxy_server=127.0.0.1
+proxy_port=22
