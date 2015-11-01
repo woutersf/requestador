@@ -72,8 +72,12 @@ Section of Monitoring settings
 
 
 ## Run ##
-* node server.js Or if you want it running continuously (forever), and restart after craches
+* node server.js
+Or if you want it running continuously (forever), and restart after craches
+* node autostart.js
+This is better than but uses the same logic as
 * forever -c node server.js
+
 
 connects to amqp , creates webserver, and socket server
 
