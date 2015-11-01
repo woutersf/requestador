@@ -25,13 +25,20 @@ if ( !extraArguments ) {
 console.log('[AUTOSTART] Running with arguments: ' + extraArguments);
 
 var monitorProcess = new (forever.Monitor)('server.js', {
+    silent: true,
+    uid: 'requestador',
+    watch: false,
+    killTree: true,
+    logFile: global.config.monitor.logfile,
+    logFile: global.config.monitor.logfile,
+    errFile: global.config.monitor.logfile,
     minUptime: global.config.autostart.min_uptime,
     spinSleepTime: config.autostart.spin_sleeptime,
     args: [extraArguments]
 });
 
 monitorProcess.on('watch:restart', function(info) {
-        writeRestart(appname + ': Restaring script because ' + info.file + ' changed', 'watch:restart');
+    writeRestart(appname + ': Restaring script because ' + info.file + ' changed', 'watch:restart');
 });
 
 monitorProcess.on('restart', function() {
@@ -41,11 +48,11 @@ monitorProcess.on('restart', function() {
 monitorProcess.on('exit:code', function(code) {
     writeRestart(appname + ': Forever detected script exited with code ' + code, 'exit: code');
 });
-
+var logFileName = __dirname + '' + global.config.log.logFile;
 var logger = new (winston.Logger)({
     exitOnError : false,
     transports : [new winston.transports.File({
-        filename : global.config.log.logFile,
+        filename : logFileName,
         'timestamp' : function() {
             return new Date(new Date().setHours(new Date().getHours() + 2)).toUTCString() + '';
         },

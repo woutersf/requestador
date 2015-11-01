@@ -1,0 +1,17 @@
+# Avoid to restart the server when using forever on some file changes.
+
+# General
+**/.idea/**
+**/.git/**
+
+# Specifics
+**/.tmp/**
+log/**
+data/**
+html/**
+
+# Restart only when js and json files are changed.
+!*.js*
+
+# But don't restart on .map regeneration.
+*.js.map

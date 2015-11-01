@@ -192,7 +192,8 @@ var requestIsStatic = function(req,res){
 }
 
 var serveStatic = function(req,res){
-    var path = require('path');
+    //var path = require('path');
+    var fs = require('fs');
     if (req.url.indexOf('js')> 0){
         var file = './' + req.url;
     }else if (req.url.indexOf('css')> 0){
@@ -201,7 +202,7 @@ var serveStatic = function(req,res){
         var file = './' + req.url;
         console.log(file);
     }
-    if (path.existsSync(file)) {
+    if (fs.existsSync(file)) {
         var fs = require('fs');
         var html = fs.readFileSync(file);
         var mime = require('mime')
