@@ -8,7 +8,7 @@ var amqp = require('amqp');
 var util = require('util');
 var functions = require('./functions');
 var data = require('./data');
-var config = ini.parse(fs.readFileSync('./data/config.ini', 'utf-8'));
+var config = ini.parse(fs.readFileSync('./config/config.ini', 'utf-8'));
 var log_file = fs.createWriteStream(__dirname + config.log.logFile, {flags : 'a'});
 var log_stdout = process.stdout;
 

@@ -1,6 +1,6 @@
 *.txt export-ignore
 LICENSE  export-ignore
 README>md  export-ignore
-data/config.ini.example  export-ignore
+config/config.ini.example  export-ignore
 data/listeners.inc.example  export-ignore
 data/senders.inc.example  export-ignore

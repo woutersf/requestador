@@ -7,7 +7,7 @@ var smtpTransport = require('nodemailer-smtp-transport');
 var os = require("os");
 var ini = require('ini');
 
-var config = ini.parse(fs.readFileSync('./data/config.ini', 'utf-8'));
+var config = ini.parse(fs.readFileSync('./config/config.ini', 'utf-8'));
 var log_file = fs.createWriteStream(__dirname + config.log.logFile, {flags : 'a'});
 global.config = config;
 var appname = config.global.name;
