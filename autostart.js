@@ -6,9 +6,10 @@ var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
 var os = require("os");
 var ini = require('ini');
-
 var config = ini.parse(fs.readFileSync('./config/config.ini', 'utf-8'));
-var log_file = fs.createWriteStream(config.log.logFile, {flags : 'a'});
+if (config.log.logToFile) {
+    var log_file = fs.createWriteStream(config.log.logFile, {flags : 'a'});
+}
 global.config = config;
 var appname = config.global.name;
 var sendMails = true;

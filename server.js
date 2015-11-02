@@ -9,7 +9,9 @@ var util = require('util');
 var functions = require('./functions');
 var data = require('./data');
 var config = ini.parse(fs.readFileSync('./config/config.ini', 'utf-8'));
-var log_file = fs.createWriteStream(config.log.logFile, {flags : 'a'});
+if (config.log.logToFile) {
+    var log_file = fs.createWriteStream(config.log.logFile, {flags : 'a'});
+}
 var log_stdout = process.stdout;
 
 global.config = config;
