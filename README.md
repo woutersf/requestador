@@ -22,61 +22,71 @@ HTTP / SOCKET / (rabbitMQ) amqp mediator
 rename your config.ini.example to config.ini and set your settings.
 
 Section of AMQP settings
-* [amqp]
-* useamq=true
-* ip=127.0.0.1
-* port=5672
-* user=guest
-* password=guest
-* heartbeat=25
-* vhost=/
+
+```ini
+[amqp]
+useamq=true
+ip=127.0.0.1
+port=5672
+user=guest
+password=guest
+heartbeat=25
+vhost=/
+```
 
 Section of socket settings
-* [server]
-* usesocketio=true
-* ip=127.0.0.1
-* port=3000
+```ini
+[server]
+usesocketio=true
+ip=127.0.0.1
+port=3000
+```
 
 Section of Webserver settings
-* [web]
-* useweb=true
-* ip=127.0.0.1
-* port=3000
+```ini
+[web]
+useweb=true
+ip=127.0.0.1
+port=3000
+```
 
 Section of Proxy settings
 Enable routing all outgoing requests through a proxy server.
-* [proxy]
-* proxy_enabled=true
-* proxy_server=127.0.0.1
-* proxy_port=3000
-
+```ini
+[proxy]
+proxy_enabled=true
+proxy_server=127.0.0.1
+proxy_port=3000
+```
 
 Section of Logging settings
-* [log]
-* logFile=debug.log
-* logToFile=true
-* logToConsole=true
+```ini
+[log]
+logFile=debug.log
+logToFile=true
+logToConsole=true
+```
 
 Section of Monitoring settings
-* [monitor]
-* logFile=monitor.log
-* active=true
-* sendmail=true
-* polltimeout=3000 (milliseconds)
-* monitorMailFrom=monitor@requestador.com
-* monitorMailTo=woutersf@gmail.com
-* monitorMailSubject=Er was een probleem
-* sendmailPath=/usr/sbin/sendmail
-* sendmailArgs= -t -f woutersf@gmail.com
-
-
+```ini
+[monitor]
+logFile=monitor.log
+active=true
+sendmail=true
+polltimeout=3000 (milliseconds)
+monitorMailFrom=monitor@requestador.com
+monitorMailTo=woutersf@gmail.com
+monitorMailSubject=Er was een probleem
+sendmailPath=/usr/sbin/sendmail
+sendmailArgs= -t -f woutersf@gmail.com
+```
 
 ## Run ##
-* node server.js
+* `node server.js`
 Or if you want it running continuously (forever), and restart after craches
-* node autostart.js
+* `node autostart.js`
 This is better than but uses the same logic as
-* forever -c node server.js
+* `forever -c node server.js`
 
 
 connects to amqp , creates webserver, and socket server
