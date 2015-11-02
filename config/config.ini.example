@@ -25,16 +25,17 @@ ip=127.0.0.1
 port=3000
 
 [log]
-:this is a path relative to the ROOT of the application
-logFile=/log/requestador.log
+:Absolute path
+logFile=/var/log/requestador.log
 logToFile=true
 logToConsole=true
-failedRequests=/log/failedRequests.log
+:Absolute path
+failedRequests=/var/log/failedRequests.log
 
 
 [monitor]
-:this is a path relative to the ROOT of the application
-logFile=/log/monitor.log
+:Absolute path
+logFile=/var/log/monitor.log
 active=true
 sendmail=true
 polltimeout=1

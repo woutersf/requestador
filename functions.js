@@ -4,7 +4,7 @@
 var failedRequest = function(content) {
     var util = require('util');
     var logfile = global.config.log.failedRequests;
-    var failed_file = fs.createWriteStream(__dirname + logfile, {flags : 'a'});
+    var failed_file = fs.createWriteStream(logfile, {flags : 'a'});
     failed_file.write(util.format(content) + '\n');
 };
 

@@ -48,7 +48,7 @@ monitorProcess.on('restart', function() {
 monitorProcess.on('exit:code', function(code) {
     writeRestart(appname + ': Forever detected script exited with code ' + code, 'exit: code');
 });
-var logFileName = __dirname + '' + global.config.log.logFile;
+var logFileName = global.config.log.logFile;
 var logger = new (winston.Logger)({
     exitOnError : false,
     transports : [new winston.transports.File({
