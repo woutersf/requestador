@@ -62,15 +62,16 @@ proxy_port=3000
 Section of Logging settings
 ```ini
 [log]
-logFile=debug.log
+logFile=/var/log/requestador.log
 logToFile=true
 logToConsole=true
+failedRequests=/var/log/failedRequests.log
 ```
 
 Section of Monitoring settings
 ```ini
 [monitor]
-logFile=monitor.log
+logFile=/var/log/requestador.log
 active=true
 sendmail=true
 polltimeout=3000 (milliseconds)
