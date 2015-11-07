@@ -115,7 +115,7 @@ if (config.amqp.useamq) {
 
 //////////////////    WEB   //////////////////////
 var server = http.createServer( function(req, res) {
-    console.log(req.method + '\t' + req.headers.origin + '\t'+ req.url);
+    console.log(req.method + '\t' + req.headers.host + '\t'+ req.url);
     if (req.method == 'POST' && config.web.useweb) {
         var body = '';
         req.on('data', function (data) {
@@ -146,8 +146,6 @@ var server = http.createServer( function(req, res) {
                 });
             });
         });
-        // res.writeHead(200, {'Content-Type': 'text/html'});
-        // res.end('post received');
     }
     else if(req.method == 'GET' && config.web.useweb)
     {
@@ -197,14 +195,13 @@ var basic = auth.basic({
 });
 
 var adminServer = http.createServer(basic, function(req, res) {
-    console.log(req.method + '\t' + req.headers.origin + '\t'+ req.url);
+    console.log(req.method + '\t' + req.headers.host + '\t'+ req.url);
 
     if (functions.requestIsStatic(req,res)) {
         functions.serveStatic(req,res);
     }
 
     if (req.method == 'POST') {
-        console.log('POST\t' + req.headers.origin + req.url);
         var body = '';
         req.on('data', function (data) {
             body += data;

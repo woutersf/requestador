@@ -150,12 +150,16 @@ var executeSenderSOCKET = function(req, sender, body, headers){
  * Loop listeners
  */
 var loopListeners = function(listeners, senders, req, method, uri, body, headers){
+    var qs = require('querystring');
     var ret = false;
     listeners.forEach(function(listener){
         if (listener.type == method && listener.url == uri)  {
             listener.senders.forEach(function(senderName){
                 senders.forEach(function(sender){
                     if (sender.name == senderName) {
+                        if (listener.type == 'POST') {
+                            body = qs.parse(body);
+                        }
                         module.exports.executeSender(req, sender, body, headers);
                         ret =  true;
                     }
