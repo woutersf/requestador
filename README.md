@@ -13,6 +13,9 @@ HTTP / SOCKET / (rabbitMQ) amqp mediator
 ## Installation ##
 * npm install
 * configure settings in data/config.ini
+* configure admin username and password in data/users.htpasswd
+* create data/listeners.inc
+* create data/senders.inc
 
 ## Requirements ##
 * are in package.json.

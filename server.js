@@ -116,6 +116,7 @@ if (config.server.usesocketio) {
     console.log('[IO] socket IO is enabled');
     global.io = require('socket.io')(server);
     console.log('[IO] attempt connect');
+    global.io.set( 'origins', '*' );
     global.io.on('connection', function(socket){
         global.socket = socket;
         console.log('[IO] connect');
@@ -155,12 +156,8 @@ if (config.server.usesocketio) {
 
 //////////////////    WEB   //////////////////////
 var server = http.createServer( function(req, res) {
-    if (functions.requestIsStatic(req,res)) {
-        functions.serveStatic(req,res);
-    }
+    console.log(req.method + '\t' + req.headers.origin + '\t'+ req.url);
     if (req.method == 'POST' && config.web.useweb) {
-        console.log('=============POST================');
-        console.log(req.url);
         var body = '';
         req.on('data', function (data) {
             body += data;
@@ -195,14 +192,14 @@ var server = http.createServer( function(req, res) {
     }
     else if(req.method == 'GET' && config.web.useweb)
     {
-
+        if (functions.requestIsStatic(req,res)) {
+            functions.serveStatic(req,res);
+        }
         if (req.url == global.config.web.webpollurl) {
             var newhtml = 'ok';
             res.writeHead(200, {'Content-Type': 'text/html'});
             res.end(newhtml);
         }else{
-            console.log('=============GET================');
-            console.log(req.url);
             data.getSenders(function(senders){
                 data.getListeners(function(listeners){
                     var val = functions.loopListeners(listeners, senders, req, req.method, req.url, body);
@@ -237,19 +234,18 @@ global.server = server;
 
 var basic = auth.basic({
     realm: "Requestador",
-    file: __dirname + "/users.htpasswd" // gevorg:gpass, Sarah:testpass ...
+    file: __dirname + "/config/users.htpasswd" // gevorg:gpass, Sarah:testpass ...
 });
 
 var adminServer = http.createServer(basic, function(req, res) {
-    console.log('===================');
-    console.log(req.url);
-    console.log('===================');
+    console.log(req.method + '\t' + req.headers.origin + '\t'+ req.url);
+
     if (functions.requestIsStatic(req,res)) {
         functions.serveStatic(req,res);
     }
+
     if (req.method == 'POST') {
-        console.log('=============POST================');
-        console.log(req.url);
+        console.log('POST\t' + req.headers.origin + req.url);
         var body = '';
         req.on('data', function (data) {
             body += data;

@@ -192,16 +192,8 @@ var requestIsStatic = function(req,res){
 }
 
 var serveStatic = function(req,res){
-    //var path = require('path');
     var fs = require('fs');
-    if (req.url.indexOf('js')> 0){
-        var file = './' + req.url;
-    }else if (req.url.indexOf('css')> 0){
-        var file = './' + req.url;
-    }else{
-        var file = './' + req.url;
-        console.log(file);
-    }
+    var file = './' + req.url;
     if (fs.existsSync(file)) {
         var fs = require('fs');
         var html = fs.readFileSync(file);
@@ -209,9 +201,10 @@ var serveStatic = function(req,res){
         var mimetype = mime.lookup(file);
         res.writeHead(200, {'Content-Type': mimetype});
         res.end(html);
-    }else{
+    } else {
         res.writeHead(404, {'Content-Type': 'text/html'});
         res.end('file does not exist');
+        //return false;
     }
 }
 
