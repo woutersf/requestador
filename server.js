@@ -111,47 +111,6 @@ if (config.amqp.useamq) {
 
 
 
-//////////////////    SOCKET   //////////////////////
-if (config.server.usesocketio) {
-    console.log('[IO] socket IO is enabled');
-    global.io = require('socket.io')(server);
-    console.log('[IO] attempt connect');
-    global.io.set( 'origins', '*' );
-    global.io.on('connection', function(socket){
-        global.socket = socket;
-        console.log('[IO] connect');
-        data.getSenders(function(senders){
-            data.getListeners(function(listeners){
-                listeners.forEach(function(listener){
-                    if (listener.type.toUpperCase() == 'SOCKET') {
-                        socket.on(listener.url, function(msg){
-                            console.log('=============SOCKET MESG================');
-                            console.log('[IO] [' + listener.url + ']received on socket: ' , msg);
-                            if (msg=='die') {
-                                process.exit(1);
-                            }
-                            functions.loopListeners(listeners, senders, null, 'SOCKET', listener.url, msg);
-                        });
-                    }
-                });
-            });
-        });
-
-        socket.on('event', function(data){
-            console.log('[IO] event');
-        });
-        socket.on('disconnect', function(){
-            console.log('[IO] disconnect');
-        });
-        socket.on('connect', function(){
-            console.log('[IO] connect');
-        });
-    });
-}else{
-    console.log('[IO] socket IO is disabled in config');
-}
-
-
 
 
 //////////////////    WEB   //////////////////////
@@ -302,6 +261,48 @@ var adminServer = http.createServer(basic, function(req, res) {
         }
     }
 });
+
+
+
+//////////////////    SOCKET   //////////////////////
+if (config.server.usesocketio) {
+    console.log('[IO] socket IO is enabled');
+    global.io = require('socket.io')(server);
+    console.log('[IO] attempt connect');
+    //global.io.set( 'origins', '*' );
+    global.io.on('connection', function(socket){
+        global.socket = socket;
+        console.log('[IO] connect');
+        data.getSenders(function(senders){
+            data.getListeners(function(listeners){
+                listeners.forEach(function(listener){
+                    if (listener.type.toUpperCase() == 'SOCKET') {
+                        socket.on(listener.url, function(msg){
+                            console.log('=============SOCKET MESG================');
+                            console.log('[IO] [' + listener.url + ']received on socket: ' , msg);
+                            if (msg=='die') {
+                                process.exit(1);
+                            }
+                            functions.loopListeners(listeners, senders, null, 'SOCKET', listener.url, msg);
+                        });
+                    }
+                });
+            });
+        });
+
+        socket.on('event', function(data){
+            console.log('[IO] event');
+        });
+        socket.on('disconnect', function(){
+            console.log('[IO] disconnect');
+        });
+        socket.on('connect', function(){
+            console.log('[IO] connect');
+        });
+    });
+}else{
+    console.log('[IO] socket IO is disabled in config');
+}
 
 
 
