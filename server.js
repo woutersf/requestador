@@ -160,7 +160,7 @@ var server = http.createServer( function(req, res) {
                             res.end('received');
                         }else{
                             res.writeHead(404, {'Content-Type': 'text/html'});
-                            res.end('nothing here');
+                            res.end('It works!');
                         }
                         var html = fs.readFileSync('./html/received.html');
                         res.writeHead(200, {'Content-Type': 'text/html'});
@@ -216,7 +216,6 @@ global.server = server;
 
 
 //////////////////    SOCKET   //////////////////////
-
 if (config.server.usesocketio) {
     console.log('[IO] socket IO is enabled');
     global.io = require('socket.io')(server);
@@ -235,7 +234,6 @@ if (config.server.usesocketio) {
                                 process.exit(1);
                             }
                             functions.loopListeners(listeners, senders, null, 'SOCKET', listener.url, msg);
-
                         });
                     }
                 });

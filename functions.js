@@ -141,7 +141,7 @@ var executeSenderSOCKET = function(req, sender, body, headers){
     }
     console.log('[SOCKET] execute socket ', sender.url);
     if (typeof global.socket != 'undefined') {
-        global.socket.emit(sender.url, body);
+        global.socket.broadcast.emit(sender.url, body);
         console.log('[SOCKET] pushed');
     }
 }
