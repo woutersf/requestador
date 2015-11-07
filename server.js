@@ -152,6 +152,10 @@ var server = http.createServer( function(req, res) {
                     res.end(html);
                 });
             }else{
+                if (global.config.web.requirepostsecret && (typeof req.headers.requestadorsecret == 'undefined' || req.headers.requestadorsecret != global.config.web.requestadorsecret)){
+                    res.writeHead(401);
+                    res.end('Secret not in header or secret incorrect.');
+                }
                 data.getSenders(function(senders){
                     data.getListeners(function(listeners){
                         var val = functions.loopListeners(listeners, senders, req, req.method, req.url, body);
@@ -221,6 +225,7 @@ if (config.server.usesocketio) {
     global.io = require('socket.io')(server);
     console.log('[IO] attempt connect');
     global.io.on('connection', function(socket){
+
         global.socket = socket;
         console.log('[IO] connect');
         data.getSenders(function(senders){
