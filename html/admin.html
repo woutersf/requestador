@@ -122,7 +122,7 @@ body {
               <div class="row toggled" id="senders">
                   <h1>Senders</h1>
                   "<i>name | method | url | data</i>" <br>Allowerd datatypes: forward (forward postbody or socket msg) empty or fixed
-                  <form method="POST" action="admin/senders">
+                  <form method="POST" action="/senders">
                   <div class="input-group">
                     <textarea  name="senders" id="senders" class="form-control" style="width:600px;height:400px;">{senders}</textarea><br>
                   </div>
@@ -137,7 +137,7 @@ body {
               <div class="row toggled" id="listeners">
                   <h1>Listeners</h1>
                   "<i>name | method | uri | senders_csv</i>"
-                  <form method="POST" action="admin/listeners">
+                  <form method="POST" action="/listeners">
                   <div class="input-group">
                     <textarea    name="listeners" id="listeners"  class="form-control" style="width:600px;height:400px;">{listeners}</textarea>
                   </div>
@@ -179,7 +179,7 @@ body {
             $(document).ready(function(){
 
                 //ON SOCKET receive
-                var socket = io();
+                var socket = io('{{socketserver}}');
                 socket.on('testchannel1', function(data) {
                       console.log('socket data received:',data);
                       var html = '<li>' + JSON.stringify(data); + '</li>' ;

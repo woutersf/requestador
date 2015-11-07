@@ -31,3 +31,4 @@ data/listeners.inc
 data/senders.inc
 log/requestador.log
 log/monitor.log
+users.htpasswd
