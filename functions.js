@@ -157,9 +157,6 @@ var loopListeners = function(listeners, senders, req, method, uri, body, headers
             listener.senders.forEach(function(senderName){
                 senders.forEach(function(sender){
                     if (sender.name == senderName) {
-                        if (listener.type == 'POST') {
-                            body = qs.parse(body);
-                        }
                         module.exports.executeSender(req, sender, body, headers);
                         ret =  true;
                     }
