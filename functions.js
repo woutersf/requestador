@@ -11,25 +11,42 @@ var failedRequest = function(content) {
 /**
  * Do sending
  */
-var executeSender = function(req, sender, body, headers){
+var executeSender = function(req, sender, body, headers, amqpObject){
     if (sender.type == 'POST') {
-        module.exports.executeSenderHTTP(req, sender, body, headers);
+        module.exports.executeSenderHTTP(req, sender, body, headers, amqpObject);
     }
     if (sender.type == 'GET') {
-        module.exports.executeSenderHTTP(req, sender, headers);
+        module.exports.executeSenderHTTP(req, sender, headers, amqpObject);
     }
     if (sender.type == 'SOCKET') {
         module.exports.executeSenderSOCKET(req, sender, body, headers);
+        module.exports.ackAmqpObject(amqpObject);
     }
     if (sender.type == 'AMQP') {
         module.exports.executeSenderAMQP(req, sender, body, headers);
+        module.exports.ackAmqpObject(amqpObject);
     }
+}
+
+var ackAmqpObject = function (amqpObject){
+    if (typeof amqpObject != 'undefined') {
+        console.log('[AMQP] ack amqp message');
+        amqpObject.acknowledge(false);
+    }
+}
+
+var rejectAmqpObject = function (amqpObject){
+    if (typeof amqpObject != 'undefined') {
+        console.log('[AMQP] reject amqp message');
+        amqpObject.reject(false);
+    }
+
 }
 
 /**
  * Do HTTP POST sending
  */
-var executeSenderHTTP = function(req, sender, body, headers){
+var executeSenderHTTP = function(req, sender, body, headers, amqpObject){
     var request = require('request');
     if (global.config.proxy.proxy_enabled) {
         console.log('[HTTP] PROXY: ' + 'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port);
@@ -57,12 +74,14 @@ var executeSenderHTTP = function(req, sender, body, headers){
         request.post(postObject, function(error, response, body){
           if (!error && response.statusCode == 200) {
                 console.log('[POSTREQUEST] request returned OK');
-                console.log(body)
+                console.log(body);
+                module.exports.ackAmqpObject(amqpObject);
             } else {
                 console.log('[POSTREQUEST] request returned NOK: ' , error);
                 var postResultObject = postObject;
                 postResultObject.error = error;
                 failedRequest(JSON.stringify(postResultObject));
+                module.exports.rejectAmqpObject(amqpObject);
             }
         });
     }else{
@@ -79,12 +98,14 @@ var executeSenderHTTP = function(req, sender, body, headers){
             if (!error && response.statusCode == 200) {
                 console.log('[GETREQUEST] request returned OK');
                 // Print out the response body
-                console.log(body)
+                console.log(body);
+                module.exports.ackAmqpObject(amqpObject);
             } else {
                 console.log('[GETREQUEST] request returned NOK: ' , error);
                 var getResultObject = getObject;
                 getResultObject.error = error;
                 failedRequest(JSON.stringify(getResultObject));
+                module.exports.rejectAmqpObject(amqpObject);
             }
         });
     }
@@ -149,7 +170,7 @@ var executeSenderSOCKET = function(req, sender, body, headers){
 /**
  * Loop listeners
  */
-var loopListeners = function(listeners, senders, req, method, uri, body, headers){
+var loopListeners = function(listeners, senders, req, method, uri, body, headers, messageObject){
     var qs = require('querystring');
     var ret = false;
     listeners.forEach(function(listener){
@@ -157,7 +178,7 @@ var loopListeners = function(listeners, senders, req, method, uri, body, headers
             listener.senders.forEach(function(senderName){
                 senders.forEach(function(sender){
                     if (sender.name == senderName) {
-                        module.exports.executeSender(req, sender, body, headers);
+                        module.exports.executeSender(req, sender, body, headers, messageObject);
                         ret =  true;
                     }
                 });
@@ -218,5 +239,7 @@ module.exports = {
   executeSender: executeSender,
   requestIsStatic: requestIsStatic,
   serveStatic: serveStatic,
-  writeSettings: writeSettings
+  writeSettings: writeSettings,
+  rejectAmqpObject: rejectAmqpObject,
+  ackAmqpObject: ackAmqpObject
 }

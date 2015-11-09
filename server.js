@@ -79,7 +79,8 @@ if (config.amqp.useamq) {
                             console.log(listener.queue);
                             amqpConnection.queue(listener.queue, options, function(q) {
                                 console.log('[AMQP] queue created ', listener.queue);
-                                q.subscribe(function(message, headers, deliveryInfo, messageObject) {
+                                var subscribeOptions = {ack: true};
+                                q.subscribe(subscribeOptions,function(message, headers, deliveryInfo, messageObject) {
                                     console.log('=============AMQ MESG================');
                                     console.log('[AMQ] [' + listener.url + ']received on Queue: ' );
                                     console.log('[AMQ] [headers]', headers );
@@ -91,7 +92,7 @@ if (config.amqp.useamq) {
                                     console.log( message);
                                     console.log( message.toString('utf-8'));
                                     console.log('[AMQ] [message]', json );
-                                    functions.loopListeners(listeners, senders, null, 'AMQP', listener.url, json, headers);
+                                    functions.loopListeners(listeners, senders, null, 'AMQP', listener.url, json, headers, messageObject);
                                 });
                             });
                         }
