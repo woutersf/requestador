@@ -91,6 +91,7 @@ var executeSenderHTTP = function(req, sender, body, headers, trigger){
             var HttpProxyAgent = require('http-proxy-agent');
             var agent = new HttpProxyAgent(proxy);
             postObject.agent = agent;
+            postObject.proxy=proxy;
         }
         request.post(postObject, function(error, response, body){
           if (!error && response.statusCode == 200) {
@@ -118,6 +119,7 @@ var executeSenderHTTP = function(req, sender, body, headers, trigger){
             var HttpProxyAgent = require('http-proxy-agent');
             var agent = new HttpProxyAgent(proxy);
             getObject.agent = agent;
+            getObject.proxy=proxy;
         }
 
         // Start the request
