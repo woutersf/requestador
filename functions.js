@@ -4,6 +4,12 @@
 var failedRequest = function(content) {
     var util = require('util');
     var logfile = global.config.log.failedRequests;
+    //Exists
+    if (!fs.existsSync(logfile)) {
+        console.log('[FAILEDREQUESTS] created log file ' + logfile  );
+        var fd = fs.openSync(logfile, 'w');
+    }
+    //var fd = fs.openSync(filepath, 'w');
     var failed_file = fs.createWriteStream(logfile, {flags : 'a'});
     failed_file.write(util.format(content) + '\n');
 };
@@ -11,20 +17,32 @@ var failedRequest = function(content) {
 /**
  * Do sending
  */
-var executeSender = function(req, sender, body, headers, amqpObject){
+var executeSender = function(req, sender, body, headers, trigger){
     if (sender.type == 'POST') {
-        module.exports.executeSenderHTTP(req, sender, body, headers, amqpObject);
+        module.exports.executeSenderHTTP(req, sender, body, headers, trigger);
     }
     if (sender.type == 'GET') {
-        module.exports.executeSenderHTTP(req, sender, headers, amqpObject);
+        module.exports.executeSenderHTTP(req, sender, null, headers, trigger);
     }
     if (sender.type == 'SOCKET') {
         module.exports.executeSenderSOCKET(req, sender, body, headers);
-        module.exports.ackAmqpObject(amqpObject);
+        module.exports.ackTrigger(trigger);
     }
     if (sender.type == 'AMQP') {
         module.exports.executeSenderAMQP(req, sender, body, headers);
-        module.exports.ackAmqpObject(amqpObject);
+        module.exports.ackTrigger(trigger);
+    }
+}
+
+var ackTrigger = function(trigger){
+    if (typeof trigger != 'undefined' && trigger.type  == 'AMQP') {
+        module.exports.ackAmqpObject(trigger.message);
+    }
+}
+
+var rejectTrigger = function(trigger){
+    if (typeof trigger != 'undefined' && trigger.type  == 'AMQP') {
+        module.exports.rejectAmqpObject(trigger);
     }
 }
 
@@ -35,10 +53,10 @@ var ackAmqpObject = function (amqpObject){
     }
 }
 
-var rejectAmqpObject = function (amqpObject){
-    if (typeof amqpObject != 'undefined') {
+var rejectAmqpObject = function (trigger){
+    if (typeof trigger != 'undefined') {
         console.log('[AMQP] reject amqp message');
-        amqpObject.reject(false);
+        trigger.queue.shift(true,false);
     }
 
 }
@@ -46,7 +64,7 @@ var rejectAmqpObject = function (amqpObject){
 /**
  * Do HTTP POST sending
  */
-var executeSenderHTTP = function(req, sender, body, headers, amqpObject){
+var executeSenderHTTP = function(req, sender, body, headers, trigger){
     var request = require('request');
     if (global.config.proxy.proxy_enabled) {
         console.log('[HTTP] PROXY: ' + 'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port);
@@ -75,17 +93,16 @@ var executeSenderHTTP = function(req, sender, body, headers, amqpObject){
           if (!error && response.statusCode == 200) {
                 console.log('[POSTREQUEST] request returned OK');
                 console.log(body);
-                module.exports.ackAmqpObject(amqpObject);
+                module.exports.ackTrigger(trigger);
             } else {
                 console.log('[POSTREQUEST] request returned NOK: ' , error);
                 var postResultObject = postObject;
                 postResultObject.error = error;
                 failedRequest(JSON.stringify(postResultObject));
-                module.exports.rejectAmqpObject(amqpObject);
+                module.exports.rejectTrigger(trigger);
             }
         });
     }else{
-
         //GET
         var getObject = {
             url: sender.url,
@@ -99,13 +116,13 @@ var executeSenderHTTP = function(req, sender, body, headers, amqpObject){
                 console.log('[GETREQUEST] request returned OK');
                 // Print out the response body
                 console.log(body);
-                module.exports.ackAmqpObject(amqpObject);
+                module.exports.ackTrigger(trigger);
             } else {
                 console.log('[GETREQUEST] request returned NOK: ' , error);
                 var getResultObject = getObject;
                 getResultObject.error = error;
                 failedRequest(JSON.stringify(getResultObject));
-                module.exports.rejectAmqpObject(amqpObject);
+                module.exports.rejectTrigger(trigger);
             }
         });
     }
@@ -170,7 +187,7 @@ var executeSenderSOCKET = function(req, sender, body, headers){
 /**
  * Loop listeners
  */
-var loopListeners = function(listeners, senders, req, method, uri, body, headers, messageObject){
+var loopListeners = function(listeners, senders, req, method, uri, body, headers, trigger){
     var qs = require('querystring');
     var ret = false;
     listeners.forEach(function(listener){
@@ -178,7 +195,7 @@ var loopListeners = function(listeners, senders, req, method, uri, body, headers
             listener.senders.forEach(function(senderName){
                 senders.forEach(function(sender){
                     if (sender.name == senderName) {
-                        module.exports.executeSender(req, sender, body, headers, messageObject);
+                        module.exports.executeSender(req, sender, body, headers, trigger);
                         ret =  true;
                     }
                 });
@@ -241,5 +258,7 @@ module.exports = {
   serveStatic: serveStatic,
   writeSettings: writeSettings,
   rejectAmqpObject: rejectAmqpObject,
-  ackAmqpObject: ackAmqpObject
+  ackAmqpObject: ackAmqpObject,
+  ackTrigger: ackTrigger,
+  rejectTrigger: rejectTrigger
 }

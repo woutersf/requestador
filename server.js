@@ -83,16 +83,27 @@ if (config.amqp.useamq) {
                                 q.subscribe(subscribeOptions,function(message, headers, deliveryInfo, messageObject) {
                                     console.log('=============AMQ MESG================');
                                     console.log('[AMQ] [' + listener.url + ']received on Queue: ' );
-                                    console.log('[AMQ] [headers]', headers );
-                                    console.log('[AMQ] [deliveryInfo]', deliveryInfo );
-                                    console.log(typeof message);
+                                    console.log('[AMQ] [headers]' );
+                                    console.log(headers);
+                                    console.log('[AMQ] [deliveryInfo]' );
+                                    console.log( deliveryInfo);
+                                    //console.log('[AMQ] [raw message]' );
+                                    console.log(message);
+                                    message = message.data.toString('utf8');
+                                    //console.log('[AMQP] String version');
+                                    console.log(message);
                                     if (typeof message  == 'object') {
-                                        var json = JSON.stringify(message)
+                                         var json = JSON.stringify(message)
+                                     }else{
+                                        json = message;
                                     }
-                                    console.log( message);
-                                    console.log( message.toString('utf-8'));
-                                    console.log('[AMQ] [message]', json );
-                                    functions.loopListeners(listeners, senders, null, 'AMQP', listener.url, json, headers, messageObject);
+
+                                    var trigger = {};
+                                    trigger.type = 'AMQP';
+                                    trigger.message = messageObject;
+                                    trigger.queue = q;
+
+                                    functions.loopListeners(listeners, senders, null, 'AMQP', listener.url, json, headers, trigger);
                                 });
                             });
                         }
@@ -189,76 +200,77 @@ global.server = server;
 
 //////////////////    ADMINWEB   //////////////////////
 
+if (config.adminserver.enabled) {
+    var basic = auth.basic({
+        realm: "Requestador",
+        file: __dirname + "/config/users.htpasswd" // gevorg:gpass, Sarah:testpass ...
+    });
 
-var basic = auth.basic({
-    realm: "Requestador",
-    file: __dirname + "/config/users.htpasswd" // gevorg:gpass, Sarah:testpass ...
-});
+    var adminServer = http.createServer(basic, function(req, res) {
+        console.log(req.method + '\t' + req.headers.host + '\t'+ req.url);
 
-var adminServer = http.createServer(basic, function(req, res) {
-    console.log(req.method + '\t' + req.headers.host + '\t'+ req.url);
+        if (functions.requestIsStatic(req,res)) {
+            functions.serveStatic(req,res);
+        }
 
-    if (functions.requestIsStatic(req,res)) {
-        functions.serveStatic(req,res);
-    }
+        if (req.method == 'POST') {
+            var body = '';
+            req.on('data', function (data) {
+                body += data;
+                if (body.length > 1e6) {
+                    // FLOOD ATTACK OR FAULTY CLIENT, NUKE REQUEST
+                    request.connection.destroy();
+                }
+            });
+            req.on('end', function () {
+                if (req.url == '/senders') {
+                    var decodedBody = qs.parse(body);
+                    functions.writeSettings('./data/senders.inc', decodedBody['senders'], function(err){
+                        if (err) {
+                            console.log('Error writing file');
+                            console.log(err);
+                        }
+                        var html = fs.readFileSync('./html/saved.html');
+                        res.writeHead(200, {'Content-Type': 'text/html'});
+                        res.end(html);
+                    });
+                }else if (req.url == '/listeners') {
+                    var decodedBody = qs.parse(body);
+                    functions.writeSettings('./data/listeners.inc', decodedBody['listeners'], function(err){
+                        if (err) {
+                            console.log('Error writing file');
+                            console.log(err);
+                        }
+                        var html = fs.readFileSync('./html/saved.html');
+                        res.writeHead(200, {'Content-Type': 'text/html'});
+                        res.end(html);
+                    });
+                }else{
+                    res.writeHead(404, {'Content-Type': 'text/html'});
+                    res.end('Oops');
+                }
+            });
+        } else
+        {
+            if (req.url == '/') {
+                var html = fs.readFileSync('./html/admin.html');
+                html = html.toString();
+                html = html.replace('{{socketserver}}','http://' + global.config.server.ip + ':' + global.config.server.port);
 
-    if (req.method == 'POST') {
-        var body = '';
-        req.on('data', function (data) {
-            body += data;
-            if (body.length > 1e6) {
-                // FLOOD ATTACK OR FAULTY CLIENT, NUKE REQUEST
-                request.connection.destroy();
-            }
-        });
-        req.on('end', function () {
-            if (req.url == '/senders') {
-                var decodedBody = qs.parse(body);
-                functions.writeSettings('./data/senders.inc', decodedBody['senders'], function(err){
-                    if (err) {
-                        console.log('Error writing file');
-                        console.log(err);
-                    }
-                    var html = fs.readFileSync('./html/saved.html');
-                    res.writeHead(200, {'Content-Type': 'text/html'});
-                    res.end(html);
-                });
-            }else if (req.url == '/listeners') {
-                var decodedBody = qs.parse(body);
-                functions.writeSettings('./data/listeners.inc', decodedBody['listeners'], function(err){
-                    if (err) {
-                        console.log('Error writing file');
-                        console.log(err);
-                    }
-                    var html = fs.readFileSync('./html/saved.html');
-                    res.writeHead(200, {'Content-Type': 'text/html'});
-                    res.end(html);
-                });
-            }else{
+                var listeners = fs.readFileSync('./data/listeners.inc' );
+                var senders = fs.readFileSync('./data/senders.inc' );
+                var newhtml = html.replace('{listeners}',listeners);
+                newhtml = newhtml.replace('{senders}',senders);
+                res.writeHead(200, {'Content-Type': 'text/html'});
+                res.end(newhtml );
+            }else
+            {
                 res.writeHead(404, {'Content-Type': 'text/html'});
                 res.end('Oops');
             }
-        });
-    } else
-    {
-        if (req.url == '/') {
-            var html = fs.readFileSync('./html/admin.html');
-            html = html.toString();
-            html = html.replace('{{socketserver}}','http://' + global.config.server.ip + ':' + global.config.server.port);
-
-            var listeners = fs.readFileSync('./data/listeners.inc' );
-            var senders = fs.readFileSync('./data/senders.inc' );
-            var newhtml = html.replace('{listeners}',listeners);
-            newhtml = newhtml.replace('{senders}',senders);
-            res.writeHead(200, {'Content-Type': 'text/html'});
-            res.end(newhtml );
-        }else
-        {
-            res.writeHead(404, {'Content-Type': 'text/html'});
-            res.end('Oops');
         }
-    }
-});
+    });
+}
 
 
 
@@ -319,9 +331,10 @@ if (config.server.useweb || config.server.usesocketio) {
 
 //////////////////   ADMINSERVER START   //////////////////////
 
-adminport = config.adminserver.port;
-adminhost = config.adminserver.ip;
+
 if (config.adminserver.enabled) {
+    adminport = config.adminserver.port;
+    adminhost = config.adminserver.ip;
     adminServer.listen(adminport, adminhost);
     console.log('[ADMINWEB]Listening at http://' + adminhost + ':' + adminport);
 }else{
