@@ -66,7 +66,6 @@ var rejectAmqpObject = function (trigger){
  */
 var executeSenderHTTP = function(req, sender, body, headers, trigger){
     var request = require('request');
-
     var querystring = require('querystring');
     var PostHeaders = {
         'Content-Type':     'application/x-www-form-urlencoded',
@@ -89,6 +88,7 @@ var executeSenderHTTP = function(req, sender, body, headers, trigger){
         if (global.config.proxy.proxy_enabled) {
             console.log('[HTTP] PROXY: ' + 'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port);
             var proxy = 'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port;
+            var HttpProxyAgent = require('http-proxy-agent');
             var agent = new HttpProxyAgent(proxy);
             postObject.agent = agent;
         }
@@ -115,6 +115,7 @@ var executeSenderHTTP = function(req, sender, body, headers, trigger){
         if (global.config.proxy.proxy_enabled) {
             console.log('[HTTP] PROXY: ' + 'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port);
             var proxy = 'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port;
+            var HttpProxyAgent = require('http-proxy-agent');
             var agent = new HttpProxyAgent(proxy);
             getObject.agent = agent;
         }
