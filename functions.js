@@ -66,10 +66,7 @@ var rejectAmqpObject = function (trigger){
  */
 var executeSenderHTTP = function(req, sender, body, headers, trigger){
     var request = require('request');
-    if (global.config.proxy.proxy_enabled) {
-        console.log('[HTTP] PROXY: ' + 'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port);
-        request = request.defaults({'proxy':'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port});
-    }
+
     var querystring = require('querystring');
     var PostHeaders = {
         'Content-Type':     'application/x-www-form-urlencoded',
@@ -89,6 +86,12 @@ var executeSenderHTTP = function(req, sender, body, headers, trigger){
           url:     sender.url,
           body:    body
         };
+        if (global.config.proxy.proxy_enabled) {
+            console.log('[HTTP] PROXY: ' + 'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port);
+            var proxy = 'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port;
+            var agent = new HttpProxyAgent(proxy);
+            postObject.agent = agent;
+        }
         request.post(postObject, function(error, response, body){
           if (!error && response.statusCode == 200) {
                 console.log('[POSTREQUEST] request returned OK');
@@ -108,6 +111,12 @@ var executeSenderHTTP = function(req, sender, body, headers, trigger){
             url: sender.url,
             method: sender.type,
             headers: headers,
+        }
+        if (global.config.proxy.proxy_enabled) {
+            console.log('[HTTP] PROXY: ' + 'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port);
+            var proxy = 'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port;
+            var agent = new HttpProxyAgent(proxy);
+            getObject.agent = agent;
         }
 
         // Start the request
