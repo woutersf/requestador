@@ -1,5 +1,10 @@
 # Requestador #
 
+## Demo ##
+See this youtube video for an example implenetation in drupal.
+This is only a fraction of what this software does.
+https://www.youtube.com/watch?v=C6NsIgGjibQ&feature=youtu.be
+
 ## Intro ##
 Sometimes you need POSTs to be GET's, POST to become socket messages or
 just listen on an amqp queue an put that stuff out there (POST/GET/socket)
