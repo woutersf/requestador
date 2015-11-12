@@ -100,9 +100,6 @@ var executeSenderHTTP = function(req, sender, body, headers, trigger){
                 module.exports.ackTrigger(trigger);
             } else {
                 console.log('[POSTREQUEST] request returned NOK: ');
-                console.log(response.statusCode);
-                console.log(response.statusMessage);
-                console.log(response.headers);
                 var postResultObject = postObject;
                 postResultObject.error = error;
                 failedRequest(JSON.stringify(postResultObject));
