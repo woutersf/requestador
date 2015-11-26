@@ -12,7 +12,7 @@ if (config.log.logToFile) {
 }
 global.config = config;
 var appname = config.global.name;
-var sendMails = true;
+var sendMails = config.monitor.sendmail;
 var transport = nodemailer.createTransport(smtpTransport({
     host: config.autostart.smtphost,
     port: config.autostart.smtpport,
