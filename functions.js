@@ -4,33 +4,40 @@
  * Check if file exists
  */
  function checkExistingFiles(){
-    checkExistingFile('./config/config.ini');
-    checkExistingFile('./data/amqp.ini');
-    checkExistingFile('./data/listeners.inc');
-    checkExistingFile('./data/senders.inc');
+    checkExistingFile('./config/config.ini', false);
+    checkExistingFile('./data/amqp.ini', false);
+    checkExistingFile('./data/listeners.inc', false);
+    checkExistingFile('./data/senders.inc', false);
  }
  /**
   *
   */
 function checkExistingLogFiles(){
-    checkExistingFile(config.log.failedRequests);
+    checkExistingFile(config.log.failedRequests, true);
     if (config.log.logToFile) {
-        checkExistingFile(config.log.logFile);
+        checkExistingFile(config.log.logFile, true);
     }
  }
 
 /**
  * Check if a file exists
  */
- function checkExistingFile(file){
+ function checkExistingFile(file, create){
     console.log('[boot] checking file ' + file);
     var fs = require('fs');
+
     if (fs.existsSync(file)) {
         //No problem.
     }
     else{
-        console.log(file);
-        throw new Error('file ' + file + ' does not exist');
+        if (create) {
+            fs.createWriteStream(file, {flags : 'a'});
+            console.log(file + ' CREATED');
+        }else{
+            throw new Error('file ' + file + ' does not exist');
+        }
+
+
     }
  }
 
