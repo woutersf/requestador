@@ -11,13 +11,13 @@ just listen on an amqp queue an put that stuff out there (POST/GET/socket)
 
 This is what Requestador does for you.
 
-You could call it a relay, or a hub or whatever.
+You could call it a relay, or a hub a messagebroker or whatever.
 
 HTTP / SOCKET / (rabbitMQ) amqp mediator
 
 ## Installation ##
 * npm install
-* configure settings in data/config.ini
+* configure settings in data/config.ini and data/amqp.ini
 * configure admin username and password in data/users.htpasswd
 * create data/listeners.inc
 * create data/senders.inc
@@ -27,19 +27,34 @@ HTTP / SOCKET / (rabbitMQ) amqp mediator
 * I run it on node v0.10.33, so anything more recent should work.
 
 ## Configuration ##
-rename your config.ini.example to config.ini and set your settings.
 
+rename your amqp.ini.example to amqp.ini and add your servers.
 Section of AMQP settings
 
 ```ini
-[amqp]
-useamq=true
+[amqpserver1]
+name=amqp1
 ip=127.0.0.1
 port=5672
 user=guest
 password=guest
 heartbeat=25
 vhost=/
+[amqpserver2]
+name=amqp2
+ip=127.0.0.1
+port=5672
+user=guest
+password=guest
+heartbeat=25
+vhost=/
+```
+rename your config.ini.example to config.ini and set your settings.
+
+Section of amqp settings
+```ini
+[amqp]
+useamq=true
 ```
 
 Section of socket settings
@@ -109,8 +124,8 @@ name | method | uri | senders_csv
 * name: a unique identifier for a listener
 * method:  POST/GET/SOCKET/AMQP
 * uri: The socket channel "testchannel" or a certain uri "/testuri" on the current domain.
-  * foramqp this is in the format "QUEUE:key:exchange"
-  * e.g. /queue/someQueueName:#.be.test.key:requestador.topic
+  * foramqp this is in the format "amqpserver:QUEUE:key:exchange"
+  * e.g. amqp1:/queue/someQueueName:#.be.test.key:requestador.topic
 * senders: a comma separated list of SENDER NAMES eg(DOPOST,DOSOCKET,DOAMQP).
 
 ## Senders ##

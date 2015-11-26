@@ -4,12 +4,6 @@ name=requestador
 
 [amqp]
 useamq=true
-ip=127.0.0.1
-port=5672
-user=guest
-password=guest
-heartbeat=25
-vhost=/
 
 [server]
 usesocketio=true
