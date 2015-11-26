@@ -1,3 +1,39 @@
+
+
+/**
+ * Check if file exists
+ */
+ function checkExistingFiles(){
+    checkExistingFile('./config/config.ini');
+    checkExistingFile('./data/amqp.ini');
+    checkExistingFile('./data/listeners.inc');
+    checkExistingFile('./data/senders.inc');
+ }
+ /**
+  *
+  */
+function checkExistingLogFiles(){
+    checkExistingFile(config.log.failedRequests);
+    if (config.log.logToFile) {
+        checkExistingFile(config.log.logFile);
+    }
+ }
+
+/**
+ * Check if a file exists
+ */
+ function checkExistingFile(file){
+    console.log('[boot] checking file ' + file);
+    var fs = require('fs');
+    if (fs.existsSync(file)) {
+        //No problem.
+    }
+    else{
+        console.log(file);
+        throw new Error('file ' + file + ' does not exist');
+    }
+ }
+
 /**
  * FailedRequests
  */
@@ -13,6 +49,89 @@ var failedRequest = function(content) {
     var failed_file = fs.createWriteStream(logfile, {flags : 'a'});
     failed_file.write(util.format(content) + '\n');
 };
+
+
+/**
+ * connect to single Amqp Server
+ */
+var connectAmqpServer = function(amqpServer){
+    var data = require('./data');
+    var amqp = require('amqp');
+    console.log('[' + amqpServer.name + '] AMQP connecting');
+    var connOptions = {
+        host : amqpServer.ip,
+        //heartbeat : config.amq.heartbeat,
+        port: amqpServer.port,
+        login: amqpServer.user,
+        password: amqpServer.password,
+        vhost: amqpServer.vhost
+    };
+    var amqpConnection;
+    amqpConnection = amqp.createConnection(connOptions, { reconnectBackoffStrategy : "exponential" });
+    global.amqpConnection = amqpConnection;
+    amqpConnection.on('error', function(err) {
+        console.log('[' + amqpServer.name + '] error ');
+        console.log(err);
+    });
+    amqpConnection.on('end', function() {
+        console.log('[' + amqpServer.name + '] ended');
+    });
+    amqpConnection.on('ready', function() {
+        console.log('[' + amqpServer.name + '] connection ready');
+        var subscribed = [];
+        data.getSenders(function(senders){
+            data.getListeners(function(listeners){
+                listeners.forEach(function(listener){
+                    if (listener.type.toUpperCase() == 'AMQP' && listener.server == amqpServer.name) {
+                        console.log('received on correct listener.');
+                        console.log(listener.server);
+                        var options = {
+                            autoDelete: false,
+                            durable: false,
+                            closeChannelOnUnsubscribe: true,
+                            noDeclare: true
+                        };
+                        amqpConnection.queue(listener.queue, options, function(q) {
+                            console.log('[' + amqpServer.name + '] queue connected ' + listener.queue);
+                            //var subscribeOptions = {ack: true};//Ack manually
+                            var subscribeOptions = {ack: false};//Ack immedately
+                            q.subscribe(subscribeOptions,function(message, headers, deliveryInfo, messageObject) {
+                                console.log('=============AMQ MESG================');
+                                console.log('[' + amqpServer.name + '] [' + listener.url + ']received on Queue: ' );
+                                console.log('[' + amqpServer.name + '] [headers]' );
+                                console.log(headers);
+                                console.log('[' + amqpServer.name + '] [deliveryInfo]' );
+                                console.log( deliveryInfo);
+                                if (typeof message.data != 'undefined') {
+                                    message = message.data.toString('utf8');
+                                }
+                                console.log(message);
+                                if (typeof message  == 'object') {
+                                     var json = JSON.stringify(message)
+                                 }else{
+                                    json = message;
+                                }
+
+                                var trigger = {};
+                                trigger.type = 'AMQP';
+                                trigger.message = messageObject;
+                                trigger.queue = q;
+
+                                module.exports.loopListeners(listeners, senders, null, 'AMQP', listener.url, json, headers, trigger);
+                            });
+                        });
+                    }
+                });
+            });
+        });
+    });
+    amqpConnection.on('close', function(msg) {
+        console.log("[" + amqpServer.name + "] connection closed: " + msg);
+    });
+    global.amqpConnections.push(amqpConnection);
+}
+
+
 
 /**
  * Do sending
@@ -35,15 +154,17 @@ var executeSender = function(req, sender, body, headers, trigger){
 }
 
 var ackTrigger = function(trigger){
-    if (typeof trigger != 'undefined' && trigger.type  == 'AMQP') {
-        module.exports.ackAmqpObject(trigger.message);
-    }
+    // Dead lettering is not supportet at the moment.
+    // if (typeof trigger != 'undefined' && trigger.type  == 'AMQP') {
+    //     module.exports.ackAmqpObject(trigger.message);
+    // }
 }
 
 var rejectTrigger = function(trigger){
-    if (typeof trigger != 'undefined' && trigger.type  == 'AMQP') {
-        module.exports.rejectAmqpObject(trigger);
-    }
+    // Dead lettering is not supportet at the moment.
+    // if (typeof trigger != 'undefined' && trigger.type  == 'AMQP') {
+    //     module.exports.rejectAmqpObject(trigger);
+    // }
 }
 
 var ackAmqpObject = function (amqpObject){
@@ -189,7 +310,7 @@ var executeSenderSOCKET = function(req, sender, body, headers){
         console.log('[SOCKET] SOCKET is disabled');
         return false;
     }
-    console.log('[SOCKET] execute socket ', sender.url);
+    console.log('[SOCKET] execute socket ' + sender.url);
     if (typeof global.socket != 'undefined') {
         global.socket.broadcast.emit(sender.url, body);
         console.log('[SOCKET] pushed');
@@ -261,6 +382,7 @@ var serveStatic = function(req,res){
 
 
 module.exports = {
+  connectAmqpServer: connectAmqpServer,
   executeSenderAMQP: executeSenderAMQP,
   executeSenderSOCKET: executeSenderSOCKET,
   executeSenderHTTP: executeSenderHTTP,
@@ -272,5 +394,7 @@ module.exports = {
   rejectAmqpObject: rejectAmqpObject,
   ackAmqpObject: ackAmqpObject,
   ackTrigger: ackTrigger,
-  rejectTrigger: rejectTrigger
+  rejectTrigger: rejectTrigger,
+  checkExistingFiles: checkExistingFiles,
+  checkExistingLogFiles: checkExistingLogFiles
 }

@@ -10,10 +10,10 @@ var auth = require('http-auth');
 
 var functions = require('./functions');
 var data = require('./data');
-
+functions.checkExistingFiles();
 var config = ini.parse(fs.readFileSync('./config/config.ini', 'utf-8'));
 global.config = config;
-
+functions.checkExistingLogFiles();
 if (config.log.logToFile) {
     var log_file = fs.createWriteStream(config.log.logFile, {flags : 'a'});
 }
@@ -34,89 +34,20 @@ console.log = function(d) {
 
 
 //////////////////    AMQP   //////////////////////
-//global amqp connection
-var amqpConnection;
-
+global.amqpConnections = [];
 /**
  * connect to amqp server and listen to all queues defined in "listeners"
  */
 if (config.amqp.useamq) {
-    var functionBindQueue = "bindQueue";
-
-    console.log('[AMQP] connecting');
-    var connOptions = {
-        host : config.amqp.ip,
-        //heartbeat : config.amq.heartbeat,
-        port: config.amqp.port,
-        login: config.amqp.user,
-        password: config.amqp.password,
-        vhost: config.amqp.vhost
-    };
-
-    amqpConnection = amqp.createConnection(connOptions, { reconnectBackoffStrategy : "exponential" });
-    global.amqpConnection = amqpConnection;
-    amqpConnection.on('error', function(err) {
-        console.log('[AMQP] error ');
-        console.log(err);
+    var amqpServers = ini.parse(fs.readFileSync('./data/amqp.ini', 'utf-8'));
+    Object.keys(amqpServers).forEach(function(index) {
+        amqpServer = amqpServers[index]
+        functions.connectAmqpServer(amqpServer);
     });
-    amqpConnection.on('end', function() {
-        console.log('[AMQP] ended');
-    });
-    amqpConnection.on('ready', function() {
-        console.log('[AMQP] connection ready');
-        var subscribed = [];
-            data.getSenders(function(senders){
-                data.getListeners(function(listeners){
-                    listeners.forEach(function(listener){
-                        if (listener.type.toUpperCase() == 'AMQP') {
-                            var options = {
-                                autoDelete: false,
-                                durable: false,
-                                closeChannelOnUnsubscribe: true,
-                                noDeclare: true
-                            };
-                            console.log('[AMQP] queue:');
-                            console.log(listener.queue);
-                            amqpConnection.queue(listener.queue, options, function(q) {
-                                console.log('[AMQP] queue created ', listener.queue);
-                                var subscribeOptions = {ack: true};
-                                q.subscribe(subscribeOptions,function(message, headers, deliveryInfo, messageObject) {
-                                    console.log('=============AMQ MESG================');
-                                    console.log('[AMQ] [' + listener.url + ']received on Queue: ' );
-                                    console.log('[AMQ] [headers]' );
-                                    console.log(headers);
-                                    console.log('[AMQ] [deliveryInfo]' );
-                                    console.log( deliveryInfo);
-                                    //console.log('[AMQ] [raw message]' );
-                                    console.log(message);
-                                    message = message.data.toString('utf8');
-                                    //console.log('[AMQP] String version');
-                                    console.log(message);
-                                    if (typeof message  == 'object') {
-                                         var json = JSON.stringify(message)
-                                     }else{
-                                        json = message;
-                                    }
-
-                                    var trigger = {};
-                                    trigger.type = 'AMQP';
-                                    trigger.message = messageObject;
-                                    trigger.queue = q;
-
-                                    functions.loopListeners(listeners, senders, null, 'AMQP', listener.url, json, headers, trigger);
-                                });
-                            });
-                        }
-                    });
-                });
-            });
-        });
-        amqpConnection.on('close', function(msg) {
-            console.log("[AMQP] connection closed: " + msg);
-        });
 }else{
     console.log('[AMQ] AMQ is disabled in config');
 }
+
 
 
 

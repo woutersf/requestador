@@ -23,9 +23,10 @@ var getListeners = function(callback){
         };
         if (listener.type == 'AMQP') {
           var amqpParts = parts[2].split(':');
-          listener.queue = amqpParts[0];
-          listener.key = amqpParts[1];
-          listener.exchange = amqpParts[2];
+          listener.server = amqpParts[0];
+          listener.queue = amqpParts[1];
+          listener.key = amqpParts[2];
+          listener.exchange = amqpParts[3];
         }
         listeners.push(listener);
       }

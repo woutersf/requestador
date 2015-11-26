@@ -32,6 +32,7 @@ config/config.ini
 config/users.htpasswd
 
 #This is the data of the software.
+data/amqp.ini
 data/listeners.inc
 data/senders.inc
 log/requestador.log
