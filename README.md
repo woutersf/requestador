@@ -105,6 +105,20 @@ sendmailPath=/usr/sbin/sendmail
 sendmailArgs= -t -f woutersf@gmail.com
 ```
 
+Section of Autostart configuration
+```ini
+[autostart]
+smtphost=127.0.0.1
+smtpport=25
+ignore_tls=true
+min_sleeptime=1000
+min_uptime=10000
+```
+Sleeptime is the time slept between restarting the process (defaults to 1000)
+min_uptime is the time the process is required to be up to be able to restart. (defaults to 1000)
+if the proces can not be up 1000 ms, it is problematic.
+
+
 ## Run ##
 * `node server.js`
 Or if you want it running continuously (forever), and restart after craches

@@ -11,6 +11,7 @@ if (config.log.logToFile) {
     var log_file = fs.createWriteStream(config.log.logFile, {flags : 'a'});
 }
 global.config = config;
+
 var appname = config.global.name;
 var sendMails = config.monitor.sendmail;
 var transport = nodemailer.createTransport(smtpTransport({
@@ -24,7 +25,12 @@ if ( !extraArguments ) {
     extraArguments = [];
 }
 console.log('[AUTOSTART] Running with arguments: ' + extraArguments);
-
+if (typeof global.config.autostart.min_uptime == 'undefined') {
+    global.config.autostart.min_uptime = 1000;
+}
+if (typeof global.config.autostart.spin_sleeptime == 'undefined') {
+    global.config.autostart.spin_sleeptime = 1000;
+}
 var monitorProcess = new (forever.Monitor)('server.js', {
     silent: true,
     uid: 'requestador',
@@ -33,8 +39,8 @@ var monitorProcess = new (forever.Monitor)('server.js', {
     logFile: global.config.monitor.logfile,
     logFile: global.config.monitor.logfile,
     errFile: global.config.monitor.logfile,
-    minUptime: global.config.autostart.min_uptime,
-    spinSleepTime: config.autostart.spin_sleeptime,
+    minUptime: parseInt(global.config.autostart.min_uptime,10),
+    spinSleepTime: parseInt(config.autostart.spin_sleeptime,10),
     args: [extraArguments]
 });
 
@@ -44,11 +50,13 @@ monitorProcess.on('watch:restart', function(info) {
 
 monitorProcess.on('restart', function() {
     writeRestart(appname + ': Forever restarting script for ' + monitorProcess.times + ' time', 'restart');
+
 });
 
 monitorProcess.on('exit:code', function(code) {
     writeRestart(appname + ': Forever detected script exited with code ' + code, 'exit: code');
 });
+
 var logFileName = global.config.log.logFile;
 var logger = new (winston.Logger)({
     exitOnError : false,
