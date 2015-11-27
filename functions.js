@@ -36,8 +36,6 @@ function checkExistingLogFiles(){
         }else{
             throw new Error('file ' + file + ' does not exist');
         }
-
-
     }
  }
 
@@ -52,9 +50,9 @@ var failedRequest = function(content) {
         console.log('[FAILEDREQUESTS] created log file ' + logfile  );
         var fd = fs.openSync(logfile, 'w');
     }
-    //var fd = fs.openSync(filepath, 'w');
     var failed_file = fs.createWriteStream(logfile, {flags : 'a'});
     failed_file.write(util.format(content) + '\n');
+    failed_file.end();
 };
 
 
