@@ -132,7 +132,7 @@ var connectAmqpServer = function (amqpServer) {
         console.log("[" + amqpServer.name + "] connection closed: " + msg);
     });
     global.amqpConnections.push(amqpConnection);
-}
+};
 
 
 /**
@@ -153,28 +153,28 @@ var executeSender = function (req, sender, body, headers, trigger) {
         module.exports.executeSenderAMQP(req, sender, body, headers);
         module.exports.ackTrigger(trigger);
     }
-}
+};
 
 var ackTrigger = function (trigger) {
     // Dead lettering is not supportet at the moment.
     // if (typeof trigger != 'undefined' && trigger.type  == 'AMQP') {
     //     module.exports.ackAmqpObject(trigger.message);
     // }
-}
+};
 
 var rejectTrigger = function (trigger) {
     // Dead lettering is not supportet at the moment.
     // if (typeof trigger != 'undefined' && trigger.type  == 'AMQP') {
     //     module.exports.rejectAmqpObject(trigger);
     // }
-}
+};
 
 var ackAmqpObject = function (amqpObject) {
     if (typeof amqpObject != 'undefined') {
         console.log('[AMQP] ack amqp message');
         amqpObject.acknowledge(false);
     }
-}
+};
 
 var rejectAmqpObject = function (trigger) {
     if (typeof trigger != 'undefined') {
@@ -182,7 +182,7 @@ var rejectAmqpObject = function (trigger) {
         trigger.queue.shift(true, false);
     }
 
-}
+};
 
 /**
  * Do HTTP POST sending
@@ -192,7 +192,7 @@ var executeSenderHTTP = function (req, sender, body, headers, trigger) {
     var querystring = require('querystring');
     var PostHeaders = {
         'Content-Type': 'application/x-www-form-urlencoded',
-    }
+    };
     console.log('[HTTP] sender HTTP');
     console.log(sender);
     for (var p in headers) {
@@ -235,7 +235,7 @@ var executeSenderHTTP = function (req, sender, body, headers, trigger) {
             url: sender.url,
             method: sender.type,
             headers: headers,
-        }
+        };
         if (global.config.proxy.proxy_enabled) {
             console.log('[HTTP] PROXY: ' + 'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port);
             var proxy = 'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port;
@@ -261,7 +261,7 @@ var executeSenderHTTP = function (req, sender, body, headers, trigger) {
             }
         });
     }
-}
+};
 
 
 /**
@@ -303,7 +303,7 @@ var executeSenderAMQP = function (req, sender, body, headers) {
             });
         });
     }
-}
+};
 /**
  * Do socket sending
  */
@@ -317,7 +317,7 @@ var executeSenderSOCKET = function (req, sender, body, headers) {
         global.socket.broadcast.emit(sender.url, body);
         console.log('[SOCKET] pushed');
     }
-}
+};
 
 /**
  * Loop listeners
@@ -338,7 +338,7 @@ var loopListeners = function (listeners, senders, req, method, uri, body, header
         }
     });
     return ret;
-}
+};
 
 
 /**
@@ -354,16 +354,14 @@ var writeSettings = function (file, data, callback) {
         console.log("The file was saved!");
         callback();
     });
-
-
-}
+};
 
 var requestIsStatic = function (req, res) {
     if (req.url.indexOf('.jpg') > 0 || req.url.indexOf('.gif') > 0 || req.url.indexOf('.png') > 0 || req.url.indexOf('.js') > 0 || req.url.indexOf('.css') > 0) {
         return true;
     }
     return false;
-}
+};
 
 var serveStatic = function (req, res) {
     var fs = require('fs');
@@ -371,7 +369,7 @@ var serveStatic = function (req, res) {
     if (fs.existsSync(file)) {
         var fs = require('fs');
         var html = fs.readFileSync(file);
-        var mime = require('mime')
+        var mime = require('mime');
         var mimetype = mime.lookup(file);
         res.writeHead(200, {'Content-Type': mimetype});
         res.end(html);
@@ -380,7 +378,7 @@ var serveStatic = function (req, res) {
         res.end('file does not exist');
         //return false;
     }
-}
+};
 
 
 module.exports = {
@@ -399,4 +397,4 @@ module.exports = {
     rejectTrigger: rejectTrigger,
     checkExistingFiles: checkExistingFiles,
     checkExistingLogFiles: checkExistingLogFiles
-}
+};

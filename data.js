@@ -35,7 +35,7 @@ var getListeners = function (callback) {
         callback(listeners);
     });
     //return listeners;
-}
+};
 
 
 var getSenders = function (callback) {
@@ -73,9 +73,9 @@ var getSenders = function (callback) {
     //console.log(senders);
     //return senders;
 
-}
+};
 
 module.exports = {
     getListeners: getListeners,
     getSenders: getSenders
-}
+};

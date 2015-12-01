@@ -112,6 +112,7 @@ body {
                 <li role="presentation"><a href="javascript://" class="toggle toggle1" rel="senders">Senders</a></li>
                 <li role="presentation"><a href="javascript://" class="toggle toggle1" rel="socket">test socket</a></li>
                 <li role="presentation"><a href="javascript://" class="toggle toggle1" rel="socketmessages">socket log</a></li>
+                  <li role="presentation"><a href="javascript://" class="reloadConfig" rel="reloadConfig">reload config</a></li>
 
               </ul>
 
@@ -203,6 +204,13 @@ body {
                   var $rel = $this.attr('rel');
                   console.log($rel);
                   $('#' + $rel).show();
+                });
+
+                $('.reloadConfig').click(function(e){
+                    e.preventDefault();
+                    if (window.confirm("Are you sure you want to reload the config (is it any good)?")) {
+                        location.href = '/admin/restart';
+                    }
                 });
 
             });
