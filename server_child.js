@@ -20,6 +20,17 @@ if (config.log.logToFile) {
 var log_stdout = process.stdout;
 
 /**
+ * Don't start if not child of server
+ */
+var process_id = process.argv[2];
+console.log(process_id);
+if ( !process_id ) {
+    throw new Error('no parent pid found');
+    global.parentPid = process_id;
+}
+
+
+/**
  * Log to a file and in the terminal.
  */
 console.log = function (d) {
@@ -119,14 +130,20 @@ var server = http.createServer(function (req, res) {
             var html = fs.readFileSync('./html/admin.html');
             html = html.toString();
             html = html.replace('{{socketserver}}', 'http://' + global.config.server.ip + ':' + global.config.server.port);
-
             var listeners = fs.readFileSync('./data/listeners.inc');
             var senders = fs.readFileSync('./data/senders.inc');
             var newhtml = html.replace('{listeners}', listeners);
             newhtml = newhtml.replace('{senders}', senders);
             res.writeHead(200, {'Content-Type': 'text/html'});
             res.end(newhtml);
-        } else {
+
+        } else if (req.url == '/admin/restart' && config.adminserver.enabled) {
+            res.writeHead(302, {
+                'Location': '/admin'
+            });
+            res.end();
+            process.kill(global.parentPid, 'SIGHUP');
+        }else {
             data.getSenders(function (senders) {
                 data.getListeners(function (listeners) {
                     var val = functions.loopListeners(listeners, senders, req, req.method, req.url, body);

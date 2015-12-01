@@ -10,8 +10,13 @@ var config = ini.parse(fs.readFileSync('./config/config.ini', 'utf-8'));
 if (config.log.logToFile) {
     var log_file = fs.createWriteStream(config.log.logFile, {flags : 'a'});
 }
-global.config = config;
 
+/**
+ *  Should we send mails, and where to?
+ *
+ * @type {number|*|{}}
+ */
+global.config = config;
 var appname = config.global.name;
 var sendMails = config.monitor.sendmail;
 var transport = nodemailer.createTransport(smtpTransport({
@@ -20,17 +25,25 @@ var transport = nodemailer.createTransport(smtpTransport({
     ignoreTLS: config.autostart.ignore_tls
 }));
 
+
+// Parse arguments.
 var extraArguments = process.argv[2];
 if ( !extraArguments ) {
     extraArguments = [];
 }
-console.log('[AUTOSTART] Running with arguments: ' + extraArguments);
+var pid = process.pid.toString();
+
+//Autostart parameters
+console.log('['+pid+'][AUTOSTART] Running with arguments: ' + extraArguments);
 if (typeof global.config.autostart.min_uptime == 'undefined') {
     global.config.autostart.min_uptime = 1000;
 }
 if (typeof global.config.autostart.spin_sleeptime == 'undefined') {
     global.config.autostart.spin_sleeptime = 1000;
 }
+extraArguments.push(pid);
+
+//Start child process.
 var monitorProcess = new (forever.Monitor)('server_child.js', {
     silent: true,
     uid: 'requestador',
@@ -44,6 +57,7 @@ var monitorProcess = new (forever.Monitor)('server_child.js', {
     args: [extraArguments]
 });
 
+
 monitorProcess.on('watch:restart', function(info) {
     writeRestart(appname + ': Restaring script because ' + info.file + ' changed', 'watch:restart');
 });
@@ -54,9 +68,18 @@ monitorProcess.on('restart', function() {
 });
 
 monitorProcess.on('exit:code', function(code) {
-    writeRestart(appname + ': Forever detected script exited with code ' + code, 'exit: code');
+    if(code == 143) {
+        writeRestart(appname + ': Forever detected script exited with code ' + code, 'exit: code');
+    }else{
+        writeRestart(appname + ': Forever detected script restart (reload config).');
+    }
 });
 
+
+/**
+ * Logging
+ * @type {*|string|exports.argvOptions.logFile|{alias}}
+ */
 var logFileName = global.config.log.logFile;
 var logger = new (winston.Logger)({
     exitOnError : false,
@@ -70,6 +93,11 @@ var logger = new (winston.Logger)({
     })]
 });
 
+/**
+ *  On restart log + mail.
+ * @param message
+ * @param reason
+ */
 function writeRestart(message, reason) {
     logger.info(message);
     var d = new Date();
@@ -77,6 +105,12 @@ function writeRestart(message, reason) {
     sendMail(appname + ': ' + reason, message);
 }
 
+/**
+ * Send mail
+ *
+ * @param subject
+ * @param text
+ */
 function sendMail(subject, text){
     if (sendMails) {
         transport.sendMail({
@@ -94,13 +128,44 @@ function sendMail(subject, text){
     }
 }
 
-
+/**
+ *  Listen to SIGTERM
+ *
+ */
 process.on('SIGTERM', function(code) {
-    sendMails = false;
     monitorProcess.stop();
 });
 
+/**
+ *  Reboot Process, reloads config et all.
+ */
+process.on('SIGHUP', function() {
+    gracefullRestart();
+});
+/**
+ *  Reboot Process, reloads config et all.
+ */
+process.on('SIGUSR2',function(){
+    gracefullRestart();
+});
 
 
+/**
+ *  Gracefull restart
+ */
+var gracefullRestart = function(code){
+    console.log(code);
+    console.log('['+pid+'][AUTOSTART] SIGHUP signal received.');
+    console.log('['+pid+'][AUTOSTART] kill child');
+    monitorProcess.stop();
 
+    setTimeout(function() {
+        console.log('['+pid+'][AUTOSTART] starting child');
+        monitorProcess.start();
+    }, 3000);
+}
+
+/**
+ * Start the works.
+ */
 monitorProcess.start();
