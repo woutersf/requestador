@@ -1,56 +1,54 @@
-
-
 /**
  * Check if file exists
  */
- function checkExistingFiles(){
+function checkExistingFiles() {
     checkExistingFile('./config/config.ini', false);
     checkExistingFile('./data/amqp.ini', false);
     checkExistingFile('./data/listeners.inc', false);
     checkExistingFile('./data/senders.inc', false);
- }
- /**
-  *
-  */
-function checkExistingLogFiles(){
+}
+/**
+ *
+ */
+function checkExistingLogFiles() {
     checkExistingFile(config.log.failedRequests, true);
     if (config.log.logToFile) {
         checkExistingFile(config.log.logFile, true);
     }
- }
+}
 
 /**
  * Check if a file exists
  */
- function checkExistingFile(file, create){
+function checkExistingFile(file, create) {
     console.log('[boot] checking file ' + file);
     var fs = require('fs');
 
     if (fs.existsSync(file)) {
         //No problem.
     }
-    else{
+    else {
         if (create) {
-            fs.createWriteStream(file, {flags : 'a'});
+            fs.createWriteStream(file, {flags: 'a'});
             console.log(file + ' CREATED');
-        }else{
+        } else {
             throw new Error('file ' + file + ' does not exist');
         }
     }
- }
+}
 
 /**
  * FailedRequests
  */
-var failedRequest = function(content) {
+var failedRequest = function (content) {
     var util = require('util');
     var logfile = global.config.log.failedRequests;
     //Exists
     if (!fs.existsSync(logfile)) {
-        console.log('[FAILEDREQUESTS] created log file ' + logfile  );
+        console.log('[FAILEDREQUESTS] created log file ' + logfile);
         var fd = fs.openSync(logfile, 'w');
     }
-    var failed_file = fs.createWriteStream(logfile, {flags : 'a'});
+    var failed_file = fs.createWriteStream(logfile, {flags: 'a'});
     failed_file.write(util.format(content) + '\n');
     failed_file.end();
 };
@@ -59,12 +57,12 @@ var failedRequest = function(content) {
 /**
  * connect to single Amqp Server
  */
-var connectAmqpServer = function(amqpServer){
+var connectAmqpServer = function (amqpServer) {
     var data = require('./data');
     var amqp = require('amqp');
     console.log('[' + amqpServer.name + '] AMQP connecting');
     var connOptions = {
-        host : amqpServer.ip,
+        host: amqpServer.ip,
         //heartbeat : config.amq.heartbeat,
         port: amqpServer.port,
         login: amqpServer.user,
@@ -72,21 +70,21 @@ var connectAmqpServer = function(amqpServer){
         vhost: amqpServer.vhost
     };
     var amqpConnection;
-    amqpConnection = amqp.createConnection(connOptions, { reconnectBackoffStrategy : "exponential" });
+    amqpConnection = amqp.createConnection(connOptions, {reconnectBackoffStrategy: "exponential"});
     global.amqpConnection = amqpConnection;
-    amqpConnection.on('error', function(err) {
+    amqpConnection.on('error', function (err) {
         console.log('[' + amqpServer.name + '] error ');
         console.log(err);
     });
-    amqpConnection.on('end', function() {
+    amqpConnection.on('end', function () {
         console.log('[' + amqpServer.name + '] ended');
     });
-    amqpConnection.on('ready', function() {
+    amqpConnection.on('ready', function () {
         console.log('[' + amqpServer.name + '] connection ready');
         var subscribed = [];
-        data.getSenders(function(senders){
-            data.getListeners(function(listeners){
-                listeners.forEach(function(listener){
+        data.getSenders(function (senders) {
+            data.getListeners(function (listeners) {
+                listeners.forEach(function (listener) {
                     if (listener.type.toUpperCase() == 'AMQP' && listener.server == amqpServer.name) {
                         console.log('received on correct listener.');
                         console.log(listener.server);
@@ -96,24 +94,24 @@ var connectAmqpServer = function(amqpServer){
                             closeChannelOnUnsubscribe: true,
                             noDeclare: true
                         };
-                        amqpConnection.queue(listener.queue, options, function(q) {
+                        amqpConnection.queue(listener.queue, options, function (q) {
                             console.log('[' + amqpServer.name + '] queue connected ' + listener.queue);
                             //var subscribeOptions = {ack: true};//Ack manually
                             var subscribeOptions = {ack: false};//Ack immedately
-                            q.subscribe(subscribeOptions,function(message, headers, deliveryInfo, messageObject) {
+                            q.subscribe(subscribeOptions, function (message, headers, deliveryInfo, messageObject) {
                                 console.log('=============AMQ MESG================');
-                                console.log('[' + amqpServer.name + '] [' + listener.url + ']received on Queue: ' );
-                                console.log('[' + amqpServer.name + '] [headers]' );
+                                console.log('[' + amqpServer.name + '] [' + listener.url + ']received on Queue: ');
+                                console.log('[' + amqpServer.name + '] [headers]');
                                 console.log(headers);
-                                console.log('[' + amqpServer.name + '] [deliveryInfo]' );
-                                console.log( deliveryInfo);
+                                console.log('[' + amqpServer.name + '] [deliveryInfo]');
+                                console.log(deliveryInfo);
                                 if (typeof message.data != 'undefined') {
                                     message = message.data.toString('utf8');
                                 }
                                 console.log(message);
-                                if (typeof message  == 'object') {
-                                     var json = JSON.stringify(message)
-                                 }else{
+                                if (typeof message == 'object') {
+                                    var json = JSON.stringify(message)
+                                } else {
                                     json = message;
                                 }
 
@@ -130,18 +128,17 @@ var connectAmqpServer = function(amqpServer){
             });
         });
     });
-    amqpConnection.on('close', function(msg) {
+    amqpConnection.on('close', function (msg) {
         console.log("[" + amqpServer.name + "] connection closed: " + msg);
     });
     global.amqpConnections.push(amqpConnection);
 }
 
 
-
 /**
  * Do sending
  */
-var executeSender = function(req, sender, body, headers, trigger){
+var executeSender = function (req, sender, body, headers, trigger) {
     if (sender.type == 'POST') {
         module.exports.executeSenderHTTP(req, sender, body, headers, trigger);
     }
@@ -158,31 +155,31 @@ var executeSender = function(req, sender, body, headers, trigger){
     }
 }
 
-var ackTrigger = function(trigger){
+var ackTrigger = function (trigger) {
     // Dead lettering is not supportet at the moment.
     // if (typeof trigger != 'undefined' && trigger.type  == 'AMQP') {
     //     module.exports.ackAmqpObject(trigger.message);
     // }
 }
 
-var rejectTrigger = function(trigger){
+var rejectTrigger = function (trigger) {
     // Dead lettering is not supportet at the moment.
     // if (typeof trigger != 'undefined' && trigger.type  == 'AMQP') {
     //     module.exports.rejectAmqpObject(trigger);
     // }
 }
 
-var ackAmqpObject = function (amqpObject){
+var ackAmqpObject = function (amqpObject) {
     if (typeof amqpObject != 'undefined') {
         console.log('[AMQP] ack amqp message');
         amqpObject.acknowledge(false);
     }
 }
 
-var rejectAmqpObject = function (trigger){
+var rejectAmqpObject = function (trigger) {
     if (typeof trigger != 'undefined') {
         console.log('[AMQP] reject amqp message');
-        trigger.queue.shift(true,false);
+        trigger.queue.shift(true, false);
     }
 
 }
@@ -190,16 +187,16 @@ var rejectAmqpObject = function (trigger){
 /**
  * Do HTTP POST sending
  */
-var executeSenderHTTP = function(req, sender, body, headers, trigger){
+var executeSenderHTTP = function (req, sender, body, headers, trigger) {
     var request = require('request');
     var querystring = require('querystring');
     var PostHeaders = {
-        'Content-Type':     'application/x-www-form-urlencoded',
+        'Content-Type': 'application/x-www-form-urlencoded',
     }
     console.log('[HTTP] sender HTTP');
     console.log(sender);
     for (var p in headers) {
-        if( headers.hasOwnProperty(p) ) {
+        if (headers.hasOwnProperty(p)) {
             //result += p + " , " + obj[p] + "\n";
             PostHeaders['Forwarded-header-' + p] = headers[p];
         }
@@ -207,9 +204,9 @@ var executeSenderHTTP = function(req, sender, body, headers, trigger){
     if (sender.type == 'POST') {
         //POST
         var postObject = {
-          headers: PostHeaders,
-          url:     sender.url,
-          body:    body
+            headers: PostHeaders,
+            url: sender.url,
+            body: body
         };
         if (global.config.proxy.proxy_enabled) {
             console.log('[HTTP] PROXY: ' + 'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port);
@@ -217,10 +214,10 @@ var executeSenderHTTP = function(req, sender, body, headers, trigger){
             var HttpProxyAgent = require('http-proxy-agent');
             var agent = new HttpProxyAgent(proxy);
             postObject.agent = agent;
-            postObject.proxy=proxy;
+            postObject.proxy = proxy;
         }
-        request.post(postObject, function(error, response, body){
-          if (!error && response.statusCode == 200) {
+        request.post(postObject, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
                 console.log('[POSTREQUEST] request returned OK');
                 console.log(body);
                 module.exports.ackTrigger(trigger);
@@ -232,7 +229,7 @@ var executeSenderHTTP = function(req, sender, body, headers, trigger){
                 module.exports.rejectTrigger(trigger);
             }
         });
-    }else{
+    } else {
         //GET
         var getObject = {
             url: sender.url,
@@ -245,7 +242,7 @@ var executeSenderHTTP = function(req, sender, body, headers, trigger){
             var HttpProxyAgent = require('http-proxy-agent');
             var agent = new HttpProxyAgent(proxy);
             getObject.agent = agent;
-            getObject.proxy=proxy;
+            getObject.proxy = proxy;
         }
 
         // Start the request
@@ -256,7 +253,7 @@ var executeSenderHTTP = function(req, sender, body, headers, trigger){
                 console.log(body);
                 module.exports.ackTrigger(trigger);
             } else {
-                console.log('[GETREQUEST] request returned NOK: ' , error);
+                console.log('[GETREQUEST] request returned NOK: ', error);
                 var getResultObject = getObject;
                 getResultObject.error = error;
                 failedRequest(JSON.stringify(getResultObject));
@@ -270,7 +267,7 @@ var executeSenderHTTP = function(req, sender, body, headers, trigger){
 /**
  * Do AMQP sending
  */
-var executeSenderAMQP = function(req, sender, body, headers){
+var executeSenderAMQP = function (req, sender, body, headers) {
     if (!global.config.amqp.useamq) {
         console.log('[AMQP] AMQP is disabled');
         return false;
@@ -289,18 +286,18 @@ var executeSenderAMQP = function(req, sender, body, headers){
             durable: false,
             closeChannelOnUnsubscribe: true,
         };
-        global.amqpConnection.queue(sender.queue, queueOptions, function(q) {
+        global.amqpConnection.queue(sender.queue, queueOptions, function (q) {
             var exchangeOptions = {
                 type: 'topic', //'direct', 'fanout'
             };
-            global.amqpConnection.exchange(sender.exchange, exchangeOptions, function(exchange){
+            global.amqpConnection.exchange(sender.exchange, exchangeOptions, function (exchange) {
                 console.log('[AMQP] exchange created ', sender.exchange);
                 queue = q;
                 queue.bind(exchange, sender.key);
                 console.log('[AMQP] exchange added to queue ', sender.exchange, sender.queue);
                 var options = {};
                 options.headers = {};
-                exchange.publish(sender.key, body, options, function(){
+                exchange.publish(sender.key, body, options, function () {
                     console.log('[AMQP] Published to Exchange ' + exchange.name + ' message:', body);
                 })
             });
@@ -310,7 +307,7 @@ var executeSenderAMQP = function(req, sender, body, headers){
 /**
  * Do socket sending
  */
-var executeSenderSOCKET = function(req, sender, body, headers){
+var executeSenderSOCKET = function (req, sender, body, headers) {
     if (!global.config.server.usesocketio) {
         console.log('[SOCKET] SOCKET is disabled');
         return false;
@@ -325,16 +322,16 @@ var executeSenderSOCKET = function(req, sender, body, headers){
 /**
  * Loop listeners
  */
-var loopListeners = function(listeners, senders, req, method, uri, body, headers, trigger){
+var loopListeners = function (listeners, senders, req, method, uri, body, headers, trigger) {
     var qs = require('querystring');
     var ret = false;
-    listeners.forEach(function(listener){
-        if (listener.type == method && listener.url == uri)  {
-            listener.senders.forEach(function(senderName){
-                senders.forEach(function(sender){
+    listeners.forEach(function (listener) {
+        if (listener.type == method && listener.url == uri) {
+            listener.senders.forEach(function (senderName) {
+                senders.forEach(function (sender) {
                     if (sender.name == senderName) {
                         module.exports.executeSender(req, sender, body, headers, trigger);
-                        ret =  true;
+                        ret = true;
                     }
                 });
             });
@@ -347,9 +344,9 @@ var loopListeners = function(listeners, senders, req, method, uri, body, headers
 /**
  * Write contents to a file.
  */
-var writeSettings = function(file, data, callback){
+var writeSettings = function (file, data, callback) {
     var fs = require('fs');
-    fs.writeFile(file, data, function(err) {
+    fs.writeFile(file, data, function (err) {
         if (err) {
             console.log(err);
             callback(err);
@@ -361,14 +358,14 @@ var writeSettings = function(file, data, callback){
 
 }
 
-var requestIsStatic = function(req,res){
-    if(req.url.indexOf('.jpg')> 0 || req.url.indexOf('.gif')> 0 || req.url.indexOf('.png')> 0 || req.url.indexOf('.js')> 0 || req.url.indexOf('.css')> 0) {
+var requestIsStatic = function (req, res) {
+    if (req.url.indexOf('.jpg') > 0 || req.url.indexOf('.gif') > 0 || req.url.indexOf('.png') > 0 || req.url.indexOf('.js') > 0 || req.url.indexOf('.css') > 0) {
         return true;
     }
     return false;
 }
 
-var serveStatic = function(req,res){
+var serveStatic = function (req, res) {
     var fs = require('fs');
     var file = './' + req.url;
     if (fs.existsSync(file)) {
@@ -387,19 +384,19 @@ var serveStatic = function(req,res){
 
 
 module.exports = {
-  connectAmqpServer: connectAmqpServer,
-  executeSenderAMQP: executeSenderAMQP,
-  executeSenderSOCKET: executeSenderSOCKET,
-  executeSenderHTTP: executeSenderHTTP,
-  loopListeners: loopListeners,
-  executeSender: executeSender,
-  requestIsStatic: requestIsStatic,
-  serveStatic: serveStatic,
-  writeSettings: writeSettings,
-  rejectAmqpObject: rejectAmqpObject,
-  ackAmqpObject: ackAmqpObject,
-  ackTrigger: ackTrigger,
-  rejectTrigger: rejectTrigger,
-  checkExistingFiles: checkExistingFiles,
-  checkExistingLogFiles: checkExistingLogFiles
+    connectAmqpServer: connectAmqpServer,
+    executeSenderAMQP: executeSenderAMQP,
+    executeSenderSOCKET: executeSenderSOCKET,
+    executeSenderHTTP: executeSenderHTTP,
+    loopListeners: loopListeners,
+    executeSender: executeSender,
+    requestIsStatic: requestIsStatic,
+    serveStatic: serveStatic,
+    writeSettings: writeSettings,
+    rejectAmqpObject: rejectAmqpObject,
+    ackAmqpObject: ackAmqpObject,
+    ackTrigger: ackTrigger,
+    rejectTrigger: rejectTrigger,
+    checkExistingFiles: checkExistingFiles,
+    checkExistingLogFiles: checkExistingLogFiles
 }

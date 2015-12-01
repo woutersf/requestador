@@ -24,7 +24,7 @@ var log_stdout = process.stdout;
  */
 var process_id = process.argv[2];
 console.log(process_id);
-if ( !process_id ) {
+if (!process_id) {
     throw new Error('no parent pid found');
     global.parentPid = process_id;
 }
@@ -143,7 +143,7 @@ var server = http.createServer(function (req, res) {
             });
             res.end();
             process.kill(global.parentPid, 'SIGHUP');
-        }else {
+        } else {
             data.getSenders(function (senders) {
                 data.getListeners(function (listeners) {
                     var val = functions.loopListeners(listeners, senders, req, req.method, req.url, body);
@@ -166,54 +166,6 @@ var server = http.createServer(function (req, res) {
     }
 });
 global.server = server;
-
-
-//////////////////    ADMINWEB   //////////////////////
-//
-//if (config.adminserver.enabled) {
-//    var basic = auth.basic({
-//        realm: "Requestador",
-//        file: __dirname + "/config/users.htpasswd" // gevorg:gpass, Sarah:testpass ...
-//    });
-//
-//    var adminServer = http.createServer(basic, function (req, res) {
-//        console.log(req.method + '\t' + req.headers.host + '\t' + req.url);
-//
-//        if (functions.requestIsStatic(req, res)) {
-//            functions.serveStatic(req, res);
-//        }
-//
-//        if (req.method == 'POST') {
-//            var body = '';
-//            req.on('data', function (data) {
-//                body += data;
-//                if (body.length > 1e6) {
-//                    // FLOOD ATTACK OR FAULTY CLIENT, NUKE REQUEST
-//                    request.connection.destroy();
-//                }
-//            });
-//            req.on('end', function () {
-//
-//            });
-//        } else {
-//            if (req.url == '/') {
-//                var html = fs.readFileSync('./html/admin.html');
-//                html = html.toString();
-//                html = html.replace('{{socketserver}}', 'http://' + global.config.server.ip + ':' + global.config.server.port);
-//
-//                var listeners = fs.readFileSync('./data/listeners.inc');
-//                var senders = fs.readFileSync('./data/senders.inc');
-//                var newhtml = html.replace('{listeners}', listeners);
-//                newhtml = newhtml.replace('{senders}', senders);
-//                res.writeHead(200, {'Content-Type': 'text/html'});
-//                res.end(newhtml);
-//            } else {
-//                res.writeHead(404, {'Content-Type': 'text/html'});
-//                res.end('Oops');
-//            }
-//        }
-//    });
-//}
 
 
 //////////////////    SOCKET   //////////////////////
@@ -258,7 +210,6 @@ if (config.server.usesocketio) {
 
 
 //////////////////    START   //////////////////////
-
 port = config.server.port;
 host = config.server.ip;
 if (config.server.useweb || config.server.usesocketio) {
@@ -267,19 +218,6 @@ if (config.server.useweb || config.server.usesocketio) {
 } else {
     console.log('[WEB] server disabled in config');
 }
-
-
-//////////////////   ADMINSERVER START   //////////////////////
-
-
-// if (config.adminserver.enabled) {
-//     adminport = config.adminserver.port;
-//     adminhost = config.adminserver.ip;
-//     adminServer.listen(adminport, adminhost);
-//     console.log('[ADMINWEB]Listening at http://' + adminhost + ':' + adminport);
-// }else{
-//     console.log('[ADMINWEB] server disabled in config');
-// }
 
 
 

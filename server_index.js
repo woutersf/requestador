@@ -8,7 +8,7 @@ var os = require("os");
 var ini = require('ini');
 var config = ini.parse(fs.readFileSync('./config/config.ini', 'utf-8'));
 if (config.log.logToFile) {
-    var log_file = fs.createWriteStream(config.log.logFile, {flags : 'a'});
+    var log_file = fs.createWriteStream(config.log.logFile, {flags: 'a'});
 }
 
 /**
@@ -28,13 +28,13 @@ var transport = nodemailer.createTransport(smtpTransport({
 
 // Parse arguments.
 var extraArguments = process.argv[2];
-if ( !extraArguments ) {
+if (!extraArguments) {
     extraArguments = [];
 }
 var pid = process.pid.toString();
 
 //Autostart parameters
-console.log('['+pid+'][AUTOSTART] Running with arguments: ' + extraArguments);
+console.log('[' + pid + '][AUTOSTART] Running with arguments: ' + extraArguments);
 if (typeof global.config.autostart.min_uptime == 'undefined') {
     global.config.autostart.min_uptime = 1000;
 }
@@ -52,25 +52,25 @@ var monitorProcess = new (forever.Monitor)('server_child.js', {
     logFile: global.config.monitor.logfile,
     logFile: global.config.monitor.logfile,
     errFile: global.config.monitor.logfile,
-    minUptime: parseInt(global.config.autostart.min_uptime,10),
-    spinSleepTime: parseInt(config.autostart.spin_sleeptime,10),
+    minUptime: parseInt(global.config.autostart.min_uptime, 10),
+    spinSleepTime: parseInt(config.autostart.spin_sleeptime, 10),
     args: [extraArguments]
 });
 
 
-monitorProcess.on('watch:restart', function(info) {
+monitorProcess.on('watch:restart', function (info) {
     writeRestart(appname + ': Restaring script because ' + info.file + ' changed', 'watch:restart');
 });
 
-monitorProcess.on('restart', function() {
+monitorProcess.on('restart', function () {
     writeRestart(appname + ': Forever restarting script for ' + monitorProcess.times + ' time', 'restart');
 
 });
 
-monitorProcess.on('exit:code', function(code) {
-    if(code == 143) {
+monitorProcess.on('exit:code', function (code) {
+    if (code == 143) {
         writeRestart(appname + ': Forever detected script exited with code ' + code, 'exit: code');
-    }else{
+    } else {
         writeRestart(appname + ': Forever detected script restart (reload config).');
     }
 });
@@ -82,14 +82,14 @@ monitorProcess.on('exit:code', function(code) {
  */
 var logFileName = global.config.log.logFile;
 var logger = new (winston.Logger)({
-    exitOnError : false,
-    transports : [new winston.transports.File({
-        filename : logFileName,
-        'timestamp' : function() {
+    exitOnError: false,
+    transports: [new winston.transports.File({
+        filename: logFileName,
+        'timestamp': function () {
             return new Date(new Date().setHours(new Date().getHours() + 2)).toUTCString() + '';
         },
-        maxFiles : 10,
-        json : false
+        maxFiles: 10,
+        json: false
     })]
 });
 
@@ -111,17 +111,17 @@ function writeRestart(message, reason) {
  * @param subject
  * @param text
  */
-function sendMail(subject, text){
+function sendMail(subject, text) {
     if (sendMails) {
         transport.sendMail({
-                from: global.config.monitor.monitorMailFrom,
-                to: global.config.monitor.monitorMailTo,
-                subject: subject,
-                text: text
-            }, function(error, info){
-            if(error){
+            from: global.config.monitor.monitorMailFrom,
+            to: global.config.monitor.monitorMailTo,
+            subject: subject,
+            text: text
+        }, function (error, info) {
+            if (error) {
                 logger.error('Error mail not sent!: ' + error);
-            }else{
+            } else {
                 logger.info('Mail sent: ' + info.response);
             }
         });
@@ -132,20 +132,20 @@ function sendMail(subject, text){
  *  Listen to SIGTERM
  *
  */
-process.on('SIGTERM', function(code) {
+process.on('SIGTERM', function (code) {
     monitorProcess.stop();
 });
 
 /**
  *  Reboot Process, reloads config et all.
  */
-process.on('SIGHUP', function() {
+process.on('SIGHUP', function () {
     gracefullRestart();
 });
 /**
  *  Reboot Process, reloads config et all.
  */
-process.on('SIGUSR2',function(){
+process.on('SIGUSR2', function () {
     gracefullRestart();
 });
 
@@ -153,14 +153,14 @@ process.on('SIGUSR2',function(){
 /**
  *  Gracefull restart
  */
-var gracefullRestart = function(code){
+var gracefullRestart = function (code) {
     console.log(code);
-    console.log('['+pid+'][AUTOSTART] SIGHUP signal received.');
-    console.log('['+pid+'][AUTOSTART] kill child');
+    console.log('[' + pid + '][AUTOSTART] SIGHUP signal received.');
+    console.log('[' + pid + '][AUTOSTART] kill child');
     monitorProcess.stop();
 
-    setTimeout(function() {
-        console.log('['+pid+'][AUTOSTART] starting child');
+    setTimeout(function () {
+        console.log('[' + pid + '][AUTOSTART] starting child');
         monitorProcess.start();
     }, 3000);
 }
