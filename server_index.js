@@ -31,7 +31,7 @@ if (typeof global.config.autostart.min_uptime == 'undefined') {
 if (typeof global.config.autostart.spin_sleeptime == 'undefined') {
     global.config.autostart.spin_sleeptime = 1000;
 }
-var monitorProcess = new (forever.Monitor)('server.js', {
+var monitorProcess = new (forever.Monitor)('server_child.js', {
     silent: true,
     uid: 'requestador',
     watch: false,
@@ -99,6 +99,7 @@ process.on('SIGTERM', function(code) {
     sendMails = false;
     monitorProcess.stop();
 });
+
 
 
 
