@@ -314,8 +314,8 @@ var executeSenderSOCKET = function (req, sender, body, headers) {
         return false;
     }
     console.log('[SOCKET] execute socket ' + sender.url);
-    if (typeof global.socket != 'undefined') {
-        global.socket.broadcast.emit(sender.url, body);
+    if (typeof global.io.sockets != 'undefined') {
+        global.io.sockets.emit(sender.url, body);
         console.log('[SOCKET] pushed');
     }
 };

@@ -188,7 +188,7 @@ if (config.server.usesocketio) {
     console.log('[IO] attempt connect');
     //global.io.set( 'origins', '*' );
     global.io.on('connection', function (socket) {
-        global.socket = socket;
+        socket = socket;
         console.log('[IO] connect');
         data.getSenders(function (senders) {
             data.getListeners(function (listeners) {
