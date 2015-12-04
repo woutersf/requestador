@@ -120,14 +120,13 @@ if the proces can not be up 1000 ms, it is problematic.
 
 
 ## Run ##
-* `node server.js`
-Or if you want it running continuously (forever), and restart after craches
-* `node autostart.js`
+If you want it running continuously (forever), and restart after craches
+* `node server_index.js`
+
 This is better than but uses the same logic as
-* `forever -c node server.js`
+* `forever -c node server_index.js`
 
-
-connects to amqp , creates webserver, and socket server
+connects to amqp , creates webserver, and socket server.
 
 ## Listeners ##
 Listeners are configured in listeners.inc

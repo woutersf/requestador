@@ -1,242 +1,116 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="Frederik Wouters">
-
-    <title>Requestador</title>
-
-    <!-- Bootstrap Core CSS -->
-
-
-    <!-- Custom CSS -->
-    <style>
-    body {
-        padding-top: 70px;
-        /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
-    }
-
-    .toggled{
-      display: none;
-    }
-
-
-    /* Sticky footer styles
--------------------------------------------------- */
-html {
-  position: relative;
-  min-height: 100%;
-}
-body {
-  /* Margin bottom by footer height */
-  margin-bottom: 60px;
-}
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  /* Set the fixed height of the footer here */
-  height: 60px;
-  background-color: #f5f5f5;
-}
-
-.container .text-muted {
-  margin: 20px 0;
-}
-        </style>
-
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
-    <script src="/js/jquery-1.11.1.js"></script>
-    <script src="/js/socket.io-1.2.0.js"></script>
-    <script src="/js/bootstrap.min.js"></script>
-
-</head>
-
-<body>
-
-    <!-- Navigation -->
-    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-        <div class="container">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header">
-                <!-- <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button> -->
-                <a class="navbar-brand" href="#">Requestador
-              <br></a>
-            </div>
-            <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav">
-                    <!-- <li>
-                        <a href="#">About</a>
-                    </li>
-                    <li>
-                        <a href="#">Services</a>
-                    </li>
-                    <li>
-                        <a href="#">Contact</a>
-                    </li> -->
-                </ul>
-            </div>
-            <!-- /.navbar-collapse -->
-        </div>
-        <!-- /.container -->
-    </nav>
-
-    <!-- Page Content -->
-    <div class="container">
-
-
-        <div class="row">
-            <div class="col-lg-12 text-center">
-
-              <ul class="nav nav-tabs toggles">
-                <li role="presentation"><a href="javascript://" class="toggle toggle1" rel="listeners">Listeners</a></li>
-                <li role="presentation"><a href="javascript://" class="toggle toggle1" rel="senders">Senders</a></li>
-                <li role="presentation"><a href="javascript://" class="toggle toggle1" rel="socket">test socket</a></li>
-                <li role="presentation"><a href="javascript://" class="toggle toggle1" rel="socketmessages">socket log</a></li>
-                  <li role="presentation"><a href="javascript://" class="reloadConfig" rel="reloadConfig">reload config</a></li>
-
-              </ul>
-
-
-              <img src="/images/requestador.png" width="20%" style="float:right;margin:10px;">
-
-
-              <div class="row toggled" id="senders">
-                  <h1>Senders</h1>
-                  "<i>name | method | url | data</i>" <br>Allowerd datatypes: forward (forward postbody or socket msg) empty or fixed
-                  <form method="POST" action="/senders">
-                  <div class="input-group">
-                    <textarea  name="senders" id="senders" class="form-control" style="width:600px;height:400px;">{senders}</textarea><br>
-                  </div>
-                  <div class="input-group">
-                    <input name="submit" id="submit" class="form-control btn btn-success" type="submit" value="Save"/>
-                  </div>
-                  </form>
-              </div>
+{% extends 'adminlayout.html' %}
 
 
 
-              <div class="row toggled" id="listeners">
-                  <h1>Listeners</h1>
-                  "<i>name | method | uri | senders_csv</i>"
-                  <form method="POST" action="/listeners">
-                  <div class="input-group">
-                    <textarea    name="listeners" id="listeners"  class="form-control" style="width:600px;height:400px;">{listeners}</textarea>
-                  </div>
-                  <div class="input-group">
-                    <input name="submit" id="submit"   class="form-control btn btn-success" type="submit" value="Save"/>
-                  </div>
-                  </form>
-              </div>
+{% block content %}
+  <ul class="nav nav-tabs toggles">
+    <li role="presentation"><a href="javascript://" class="toggle toggle1" rel="listeners">Listeners</a></li>
+    <li role="presentation"><a href="javascript://" class="toggle toggle1" rel="senders">Senders</a></li>
+    <li role="presentation"><a href="javascript://" class="toggle toggle1" rel="socket">test socket</a></li>
+    <li role="presentation"><a href="javascript://" class="toggle toggle1" rel="socketmessages">socket log</a></li>
+      <li role="presentation"><a href="javascript://" class="reloadConfig" rel="reloadConfig">reload config</a></li>
+
+  </ul>
 
 
-              <div class="row toggled" id="socket">
-                  <h1>test socket event</h1>
-                  <form method="POST"  id="socketTest">
-                  <div class="input-group">
-                  Channel: <input type="text" name="channel" id="channel" value="test">
-                  </div>
-                  Json:
-                  <div class="input-group">
-                    <textarea name="message" id="message" style="width:300px;height:100px;">{foo:'barf'}</textarea>
-                  </div>
-                  <div class="input-group">
-                    <input class="form-control btn btn-success" type="submit" value="Test"/>
-                  </div>
-                  </form>
-              </div>
+  <img src="/public/images/requestador.png" width="20%" style="float:right;margin:10px;">
 
 
-
-              <div class="row toggled" id="socketmessages">
-                  <h1>Socket log</h1>
-                  <div  style="border:1px solid gray;min-height:200px;"><ul id="messages">
-                  </ul></div>
-              </div>
-
-
-              <script>
-
-
-            $(document).ready(function(){
-
-                //ON SOCKET receive
-                var socket = io('{{socketserver}}');
-                socket.on('testchannel1', function(data) {
-                      console.log('socket data received:',data);
-                      var html = '<li>' + JSON.stringify(data); + '</li>' ;
-                      $('#messages').append(html);
-                });
-
-                //POST TO SOCKET
-                $('#socketTest').submit(function(){
-                  console.log('Push test to socket');
-                  var $input = $('#message').val();
-                  var $channel = $('#channel').val();
-                  socket.emit($channel, $input);
-                  //$('#m').val('');
-                  return false;
-                });
-
-                //Toggling
-                $('a.toggle').click(function(){
-                  var $this = $(this);
-                  $('.toggled').hide();
-                  var $rel = $this.attr('rel');
-                  console.log($rel);
-                  $('#' + $rel).show();
-                });
-
-                $('.reloadConfig').click(function(e){
-                    e.preventDefault();
-                    if (window.confirm("Are you sure you want to reload the config (is it any good)?")) {
-                        location.href = '/admin/restart';
-                    }
-                });
-
-            });
-
-            </script>
-
-            </div>
-        </div>
-        <!-- /.row -->
-
-
-
-    </div>
-    <!-- /.container -->
-
-
-    <footer class="footer">
-      <div class="container">
-        <p class="text-muted"><a href="http://requestador.io">Requestador</a> - <a href="https://github.com/wouters-frederik/requestador">github</a>  - <a href="http://it2servu.be">support</a></p>
+  <div class="row toggled" id="senders">
+      <h1>Senders</h1>
+      "<i>name | method | url | data</i>" <br>Allowerd datatypes: forward (forward postbody or socket msg) empty or fixed
+      <form method="POST" action="/admin/senders">
+      <div class="input-group">
+        <textarea  name="senders" id="senders" class="form-control" style="width:600px;height:400px;">{{ senders }}</textarea><br>
       </div>
-    </footer>
-
-</body>
-
-</html>
-
-
+      <div class="input-group">
+        <input name="submit" id="submit" class="form-control btn btn-success" type="submit" value="Save"/>
+      </div>
+      </form>
+  </div>
 
 
+
+  <div class="row toggled" id="listeners">
+      <h1>Listeners</h1>
+      "<i>name | method | uri | senders_csv</i>"
+      <form method="POST" action="/admin/listeners">
+      <div class="input-group">
+        <textarea    name="listeners" id="listeners"  class="form-control" style="width:600px;height:400px;">{{ listeners }}</textarea>
+      </div>
+      <div class="input-group">
+        <input name="submit" id="submit"   class="form-control btn btn-success" type="submit" value="Save"/>
+      </div>
+      </form>
+  </div>
+
+
+  <div class="row toggled" id="socket">
+      <h1>test socket event</h1>
+      <form method="POST"  id="socketTest">
+      <div class="input-group">
+      Channel: <input type="text" name="channel" id="channel" value="test">
+      </div>
+      Json:
+      <div class="input-group">
+        <textarea name="message" id="message" style="width:300px;height:100px;">{foo:'barf'}</textarea>
+      </div>
+      <div class="input-group">
+        <input class="form-control btn btn-success" type="submit" value="Test"/>
+      </div>
+      </form>
+  </div>
+
+
+
+  <div class="row toggled" id="socketmessages">
+      <h1>Socket log</h1>
+      <div  style="border:1px solid gray;min-height:200px;"><ul id="messages">
+      </ul></div>
+  </div>
+
+
+  <script>
+
+
+$(document).ready(function(){
+
+    //ON SOCKET receive
+    var socket = io('{{ socketserver }}');
+    socket.on('testchannel1', function(data) {
+          console.log('socket data received:',data);
+          var html = '<li>' + JSON.stringify(data); + '</li>' ;
+          $('#messages').append(html);
+    });
+
+    //POST TO SOCKET
+    $('#socketTest').submit(function(){
+      console.log('Push test to socket');
+      var $input = $('#message').val();
+      var $channel = $('#channel').val();
+      socket.emit($channel, $input);
+      //$('#m').val('');
+      return false;
+    });
+
+    //Toggling
+    $('a.toggle').click(function(){
+      var $this = $(this);
+      $('.toggled').hide();
+      var $rel = $this.attr('rel');
+      console.log($rel);
+      $('#' + $rel).show();
+    });
+
+    $('.reloadConfig').click(function(e){
+        e.preventDefault();
+        if (window.confirm("Are you sure you want to reload the config (is it any good)?")) {
+            location.href = '/admin/restart';
+        }
+    });
+
+});
+
+</script>
+
+{% endblock %}

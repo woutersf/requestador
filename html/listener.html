@@ -1,0 +1,62 @@
+<form action="{{ method }}">
+
+    Listener: {{ listener.name }}
+
+    <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" class="form-control" id="name" value="{{ listener.name }}">
+    </div>
+
+    <div class="form-group">
+        <label for="type">Email address:</label>
+        <select class="form-control" name="type" id="type">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="SOCKET">SOCKET</option>
+            <option value="AMQP">AMQP</option>
+        </select>
+    </div>
+
+    <div class="form-group" rel="GET">
+        <label for="url">Url:</label>
+        <input type="text" class="form-control" id="url-get" value="{{ listener.url }}">
+    </div>
+    <div class="form-group" rel="POST">
+        <label for="url">Url:</label>
+        <input type="text" class="form-control" id="url-post" value="{{ listener.url }}">
+    </div>
+    <div class="form-group" rel="SOCKET">
+        <label for="url">channel:</label>
+        <input type="text" class="form-control" id="url-socket" value="{{ listener.url }}">
+    </div>
+    <div class="form-group" rel="AMQP">
+        <label for="url">Url:</label>
+        <!--local:/queue/testToAmqp:#toamqp.key.be:amqp.topic-->
+        <select name="amqpinstance" id="amqp-instance">
+            {% for amqp in amqpServers %}
+                <option value="{{ amqp.name }}">{{ amqp.name }}</option>
+            {% endfor %}
+        </select>
+        <label for="amqp-queue">Queue:</label>
+        <input type="text" class="form-control" id="amqp-queue" value="{{ listener.queue }}">
+        <label for="amqp-key">Key:</label>
+        <input type="text" class="form-control" id="amqp-key" value="{{ listener.key }}">
+        <label for="amqp-exchange">Exchange:</label>
+        <input type="text" class="form-control" id="amqp-exchange" value="{{ listener.exchange }}">
+    </div>
+    <input type="hidden" class="form-control" id="url" value="{{ listener.url }}">
+
+
+    <div class="form-group">
+        <label for="type">What with data:</label>
+        <select class="form-control" name="type" id="type">
+            <option value="forward">forward</option>
+            <option value="empty">empty</option>
+            <option value="fixed">fixed</option>
+        </select>
+    </div>
+
+
+    <button type="submit" class="btn btn-default">Submit</button>
+
+</form>

@@ -7,7 +7,8 @@ var qs = require('querystring');
 var amqp = require('amqp');
 var util = require('util');
 var auth = require('http-auth');
-
+var swig  = require('swig');
+var pam = require('authenticate-pam');
 var functions = require('./functions');
 var data = require('./data');
 functions.checkExistingFiles();
@@ -19,20 +20,17 @@ if (config.log.logToFile) {
 }
 var log_stdout = process.stdout;
 
-/**
- * Don't start if not child of server
- */
+
+//////////////////    Must.start.parent.   //////////////////////
 var process_id = process.argv[2];
-console.log(process_id);
 if (!process_id) {
     throw new Error('no parent pid found');
     global.parentPid = process_id;
 }
 
 
-/**
- * Log to a file and in the terminal.
- */
+
+//////////////////    Logging   //////////////////////
 console.log = function (d) {
     if (config.log.logToFile) {
         log_file.write(util.format(d) + '\n');
@@ -45,9 +43,6 @@ console.log = function (d) {
 
 //////////////////    AMQP   //////////////////////
 global.amqpConnections = [];
-/**
- * connect to amqp server and listen to all queues defined in "listeners"
- */
 if (config.amqp.useamq) {
     var amqpServers = ini.parse(fs.readFileSync('./data/amqp.ini', 'utf-8'));
     Object.keys(amqpServers).forEach(function (index) {
@@ -59,119 +54,137 @@ if (config.amqp.useamq) {
 }
 
 
-//////////////////    WEB   //////////////////////
-var server = http.createServer(function (req, res) {
-    console.log(req.method + '\t' + req.headers.host + '\t' + req.url);
-    if (req.method == 'POST' && config.web.useweb) {
-        var body = '';
-        req.on('data', function (data) {
-            body += data;
-            if (body.length > 1e6) {
-                // FLOOD ATTACK OR FAULTY CLIENT, NUKE REQUEST
-                request.connection.destroy();
-            }
-        });
-        req.on('end', function () {
-            if (req.url == '/senders' && config.adminserver.enabled) {
-                var decodedBody = qs.parse(body);
-                functions.writeSettings('./data/senders.inc', decodedBody['senders'], function (err) {
-                    if (err) {
-                        console.log('Error writing file');
-                        console.log(err);
-                    }
-                    var html = fs.readFileSync('./html/saved.html');
-                    res.writeHead(200, {'Content-Type': 'text/html'});
-                    res.end(html);
-                });
-            } else if (req.url == '/listeners' && config.adminserver.enabled) {
-                var decodedBody = qs.parse(body);
-                functions.writeSettings('./data/listeners.inc', decodedBody['listeners'], function (err) {
-                    if (err) {
-                        console.log('Error writing file');
-                        console.log(err);
-                    }
-                    var html = fs.readFileSync('./html/saved.html');
-                    res.writeHead(200, {'Content-Type': 'text/html'});
-                    res.end(html);
-                });
-            } else {
-                if (global.config.web.requirepostsecret && (typeof req.headers.requestadorsecret == 'undefined' || req.headers.requestadorsecret != global.config.web.requestadorsecret)) {
-                    res.writeHead(401);
-                    res.end('Secret not in header or secret incorrect.');
-                }
 
-                data.getSenders(function (senders) {
-                    data.getListeners(function (listeners) {
-                        var val = functions.loopListeners(listeners, senders, req, req.method, req.url, body);
-                        if (val) {
-                            res.writeHead(200, {'Content-Type': 'text/html'});
-                            res.end('received');
-                        } else {
-                            res.writeHead(404, {'Content-Type': 'text/html'});
-                            res.end('It works!');
-                        }
-                        var html = fs.readFileSync('./html/received.html');
-                        res.writeHead(200, {'Content-Type': 'text/html'});
-                        res.end(html);
-                    });
-                });
-            }
-        });
-    }
-    else if (req.method == 'GET' && config.web.useweb) {
-        if (functions.requestIsStatic(req, res)) {
-            functions.serveStatic(req, res);
-        }
-        if (req.url == global.config.web.webpollurl) {
-            var newhtml = 'ok';
-            res.writeHead(200, {'Content-Type': 'text/html'});
-            res.end(newhtml);
-        } else if (req.url == '/admin' && config.adminserver.enabled) {
-            var html = fs.readFileSync('./html/admin.html');
-            html = html.toString();
-            html = html.replace('{{socketserver}}', 'http://' + global.config.server.ip + ':' + global.config.server.port);
-            var listeners = fs.readFileSync('./data/listeners.inc');
-            var senders = fs.readFileSync('./data/senders.inc');
-            var newhtml = html.replace('{listeners}', listeners);
-            newhtml = newhtml.replace('{senders}', senders);
-            res.writeHead(200, {'Content-Type': 'text/html'});
-            res.end(newhtml);
+//////////////////    Webserver   //////////////////////
+port = config.server.port;
+host = config.server.ip;
+var path = require('path');
+var express = require('express');
+var app = express();
+var http = require('http').Server(app);
+var bodyParser = require('body-parser');
 
-        } else if (req.url == '/admin/restart' && config.adminserver.enabled) {
-            res.writeHead(302, {
-                'Location': '/admin'
-            });
-            res.end();
-            process.kill(global.parentPid, 'SIGHUP');
-        } else {
-            data.getSenders(function (senders) {
-                data.getListeners(function (listeners) {
-                    var val = functions.loopListeners(listeners, senders, req, req.method, req.url, body);
-                    if (val) {
-                        res.writeHead(200, {'Content-Type': 'text/html'});
-                        res.end('200:ok');
-                    } else {
-                        res.writeHead(404, {'Content-Type': 'text/html'});
-                        res.end('404:Page not found');
-                    }
-                    var html = fs.readFileSync('./html/received.html');
-                    res.writeHead(200, {'Content-Type': 'text/html'});
-                    res.end(html);
+// Middleware
+app.use(bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+    extended: true
+}));
 
-                });
-            });
-        }
-    } else {
-        console.log('[WEB] unsupported request type or server not enabled in config');
-    }
+// Logging middleware
+app.use(function(request, response, next) {
+    console.log(request.method + '\t' + request.headers.host + '\t' + request.url);
+    next();
 });
-global.server = server;
+
+//Serve static content
+app.use('/public', express.static(__dirname + '/public'));
+
+// Web poll (for nagios or other status things).
+app.get(global.config.web.webpollurl, function(req, res){
+    res.send('ok');
+});
+
+// Admin area for administration of the thing.
+app.get('/admin', function(req, res){
+    res.send('admin');
+    //showAdminAreaGet(req, res);
+});
+app.get('/admin/login', function(req, res){
+    res.send('admin');
+    //showAdminAreaGet(req, res);
+});
+app.get('/admin/logout', function(req, res){
+    res.send('admin');
+    //showAdminAreaGet(req, res);
+});
+app.get('/admin/restart', function(req, res){
+    res.writeHead(302, {
+        'Location': '/admin'
+    });
+    //res.send('');
+    process.kill(global.parentPid, 'SIGHUP');
+    res.send('admin');
+});
+
+
+
+app.post('/admin/listeners', function(req, res){
+    var decodedBody = req.body;
+    //var decodedBody = qs.parse(body);
+    functions.writeSettings('./data/listeners.inc', decodedBody['listeners'], function (err) {
+        if (err) {
+            console.log('Error writing file');
+            console.log(err);
+        }
+        var html = swig.renderFile('./html/saved.html', {});
+        //res.writeHead(200, {'Content-Type': 'text/html'});
+        res.send(html);
+    });
+});
+
+app.post('/admin/senders', function(req, res){
+    var decodedBody = req.body;
+    functions.writeSettings('./data/senders.inc', decodedBody['senders'], function (err) {
+        if (err) {
+            console.log('Error writing file');
+            console.log(err);
+        }
+        var html = swig.renderFile('./html/saved.html', {});
+        //res.writeHead(200, {'Content-Type': 'text/html'});
+        res.send(html);
+    });
+});
+
+
+
+//Catch all POST requests for dynamic handling
+app.post('*', function(req, res){;
+    var decodedBody = req.body;
+    if (global.config.web.requirepostsecret &&
+        (typeof req.headers.requestadorsecret == 'undefined' || req.headers.requestadorsecret != global.config.web.requestadorsecret)) {
+        res.status(401).send('Secret not in header or secret incorrect.');
+        return false;
+    }
+    data.getSenders(function (senders) {
+        data.getListeners(function (listeners) {
+            var val = functions.loopListeners(listeners, senders, req, req.method, req.url, decodedBody);
+            if (val) {
+                res.send('ok');
+                return true;
+            } else {
+                res.status(404).send('Not found');
+                return false;
+            }
+        });
+    });
+});
+
+
+
+//Catch all GET requests for dynamic handling
+app.get('*', function(req, res){
+    var body = '';
+    data.getSenders(function (senders) {
+        data.getListeners(function (listeners) {
+            var val = functions.loopListeners(listeners, senders, req, req.method, req.url, body);
+            if (val) {
+                res.send('ok');
+                return true;
+            } else {
+                res.status(404).send('Not found');
+                return false;
+            }
+        });
+    });
+});
+
+
 
 
 //////////////////    SOCKET   //////////////////////
 if (config.server.usesocketio) {
     console.log('[IO] socket IO is enabled');
-    global.io = require('socket.io')(server);
+    global.io = require('socket.io')(http);
     console.log('[IO] attempt connect');
     //global.io.set( 'origins', '*' );
     global.io.on('connection', function (socket) {
@@ -208,16 +221,10 @@ if (config.server.usesocketio) {
     console.log('[IO] socket IO is disabled in config');
 }
 
-
-//////////////////    START   //////////////////////
-port = config.server.port;
-host = config.server.ip;
 if (config.server.useweb || config.server.usesocketio) {
-    server.listen(port, host);
-    console.log('[WEB] Listening at http://' + host + ':' + port);
+    http.listen(port, function(){
+        console.log('[WEB] Listening on port:' + port);
+    });
 } else {
     console.log('[WEB] server disabled in config');
 }
-
-
-

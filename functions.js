@@ -38,9 +38,9 @@ function checkExistingFile(file, create) {
 }
 
 /**
- * FailedRequests
+ * FailedRequest
  */
-var failedRequest = function (content) {
+var failedRequests = function (content) {
     var util = require('util');
     var logfile = global.config.log.failedRequests;
     //Exists
@@ -52,6 +52,7 @@ var failedRequest = function (content) {
     failed_file.write(util.format(content) + '\n');
     failed_file.end();
 };
+
 
 
 /**
@@ -206,7 +207,7 @@ var executeSenderHTTP = function (req, sender, body, headers, trigger) {
         var postObject = {
             headers: PostHeaders,
             url: sender.url,
-            body: body
+            body: require('querystring').stringify(body)
         };
         if (global.config.proxy.proxy_enabled) {
             console.log('[HTTP] PROXY: ' + 'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port);
@@ -225,7 +226,7 @@ var executeSenderHTTP = function (req, sender, body, headers, trigger) {
                 console.log('[POSTREQUEST] request returned NOK: ');
                 var postResultObject = postObject;
                 postResultObject.error = error;
-                failedRequest(JSON.stringify(postResultObject));
+                failedRequests(JSON.stringify(postResultObject));
                 module.exports.rejectTrigger(trigger);
             }
         });
@@ -256,7 +257,7 @@ var executeSenderHTTP = function (req, sender, body, headers, trigger) {
                 console.log('[GETREQUEST] request returned NOK: ', error);
                 var getResultObject = getObject;
                 getResultObject.error = error;
-                failedRequest(JSON.stringify(getResultObject));
+                failedRequests(JSON.stringify(getResultObject));
                 module.exports.rejectTrigger(trigger);
             }
         });
@@ -356,29 +357,7 @@ var writeSettings = function (file, data, callback) {
     });
 };
 
-var requestIsStatic = function (req, res) {
-    if (req.url.indexOf('.jpg') > 0 || req.url.indexOf('.gif') > 0 || req.url.indexOf('.png') > 0 || req.url.indexOf('.js') > 0 || req.url.indexOf('.css') > 0) {
-        return true;
-    }
-    return false;
-};
 
-var serveStatic = function (req, res) {
-    var fs = require('fs');
-    var file = './' + req.url;
-    if (fs.existsSync(file)) {
-        var fs = require('fs');
-        var html = fs.readFileSync(file);
-        var mime = require('mime');
-        var mimetype = mime.lookup(file);
-        res.writeHead(200, {'Content-Type': mimetype});
-        res.end(html);
-    } else {
-        res.writeHead(404, {'Content-Type': 'text/html'});
-        res.end('file does not exist');
-        //return false;
-    }
-};
 
 
 module.exports = {
@@ -388,8 +367,6 @@ module.exports = {
     executeSenderHTTP: executeSenderHTTP,
     loopListeners: loopListeners,
     executeSender: executeSender,
-    requestIsStatic: requestIsStatic,
-    serveStatic: serveStatic,
     writeSettings: writeSettings,
     rejectAmqpObject: rejectAmqpObject,
     ackAmqpObject: ackAmqpObject,
