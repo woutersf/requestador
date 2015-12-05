@@ -158,6 +158,11 @@ if (config.adminserver.enabled) {
         next();
     });
 
+    // Web poll (for nagios or other status things).
+    adminapp.get(global.config.web.webpollurl, function(req, res){
+        res.send('ok');
+    });
+
 //Serve static content
     adminapp.use('/public', express.static(__dirname + '/public'));
     if (config.adminserver.authenticateMethod == "PAM") {
@@ -166,10 +171,7 @@ if (config.adminserver.enabled) {
     }
 
 
-// Web poll (for nagios or other status things).
-    adminapp.get(global.config.web.webpollurl, function(req, res){
-        res.send('ok');
-    });
+
     // Admin area for administration of the thing.
     adminapp.get('/', function (req, res) {
         fs.readFile('./data/listeners.inc', 'utf8',function read(err, data) {
