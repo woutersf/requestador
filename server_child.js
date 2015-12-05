@@ -88,9 +88,9 @@ app.get(global.config.web.webpollurl, function(req, res){
 });
 
 
-
 //Catch all POST requests for dynamic handling
-app.post('*', function(req, res){;
+app.post('*', function(req, res, next){
+    if (req.url.indexOf('/admin')  == 0) return next();
     var decodedBody = req.body;
     if (global.config.web.requirepostsecret &&
         (typeof req.headers.requestadorsecret == 'undefined' || req.headers.requestadorsecret != global.config.web.requestadorsecret)) {
@@ -114,7 +114,8 @@ app.post('*', function(req, res){;
 
 
 //Catch all GET requests for dynamic handling
-app.get('*', function(req, res){
+app.get('*', function(req, res, next){
+    if (req.url.indexOf('/admin')  == 0) return next();
     var body = '';
     data.getSenders(function (senders) {
         data.getListeners(function (listeners) {
@@ -130,50 +131,15 @@ app.get('*', function(req, res){
     });
 });
 
-if (config.server.useweb || config.server.usesocketio) {
-    http.listen(port, function(){
-        console.log('[WEBINPUT] Listening on port:' + port);
-    });
-} else {
-    console.log('[WEBINPUT] server disabled in config');
-}
 
-//////////////////    ADMIN   //////////////////////
-
-
-if (config.adminserver.enabled) {
-
-    var adminapp = express();
-    var adminhttp = require('http').Server(adminapp);
-
-    // Middleware
-    adminapp.use(bodyParser.json() );       // to support JSON-encoded bodies
-    adminapp.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-        extended: true
-    }));
-
-// Logging middleware
-    adminapp.use(function(request, response, next) {
-        console.log(request.method + '\t' + request.headers.host + '\t' + request.url);
-        next();
-    });
-
-    // Web poll (for nagios or other status things).
-    adminapp.get(global.config.web.webpollurl, function(req, res){
-        res.send('ok');
-    });
-
-//Serve static content
-    adminapp.use('/public', express.static(__dirname + '/public'));
+if(config.adminserver.enabled ){
     if (config.adminserver.authenticateMethod == "PAM") {
         var pam_auth = require('express-pam');
-        adminapp.use(pam_auth("Requestador"));
+        app.use(pam_auth("Requestador"));
     }
 
-
-
-    // Admin area for administration of the thing.
-    adminapp.get('/', function (req, res) {
+// Admin area for administration of the thing.
+    app.get('/admin', function (req, res) {
         fs.readFile('./data/listeners.inc', 'utf8',function read(err, data) {
             if (err) {
                 throw err;
@@ -200,17 +166,17 @@ if (config.adminserver.enabled) {
         });
 
     });
-    adminapp.get('/login', function (req, res) {
+    app.get('/admin/login', function (req, res) {
         var html = swig.renderFile('./html/login.html', {});
         res.send(html);
     });
-    adminapp.get('/logout', function (req, res) {
+    app.get('/admin/logout', function (req, res) {
         res.send('admin');
         //showAdminAreaGet(req, res);
     });
 
 
-    adminapp.post('/listeners', function(req, res){
+    app.post('/admin/listeners', function(req, res){
         var decodedBody = req.body;
         //var decodedBody = qs.parse(body);
         functions.writeSettings('./data/listeners.inc', decodedBody['listeners'], function (err) {
@@ -223,7 +189,7 @@ if (config.adminserver.enabled) {
         });
     });
 
-    adminapp.post('/senders', function(req, res){
+    app.post('/admin/senders', function(req, res){
         var decodedBody = req.body;
         functions.writeSettings('./data/senders.inc', decodedBody['senders'], function (err) {
             if (err) {
@@ -235,7 +201,7 @@ if (config.adminserver.enabled) {
         });
     });
 
-    adminapp.post('/amqp', function(req, res){
+    app.post('/admin/amqp', function(req, res){
         var decodedBody = req.body;
         functions.writeSettings('./data/amqp.ini', decodedBody['amqp'], function (err) {
             if (err) {
@@ -246,7 +212,7 @@ if (config.adminserver.enabled) {
             res.send(html);
         });
     });
-    adminapp.get('/restart', function (req, res) {
+    app.get('/admin/restart', function (req, res) {
         var html = swig.renderFile('./html/restarting.html', {});
         res.send(html);
         //res.redirect('/');
@@ -254,20 +220,25 @@ if (config.adminserver.enabled) {
     });
 }
 
-
-if (config.adminserver.enabled) {
-    adminhttp.listen(config.adminserver.port, function(){
-        console.log('[ADMINWEB] Listening on port:' + port);
+if (config.server.useweb || config.server.usesocketio) {
+    http.listen(port, function(){
+        console.log('[WEBINPUT] Listening on port:' + port);
     });
 } else {
-    console.log('[ADMINWEB] server disabled in config');
+    console.log('[WEBINPUT] server disabled in config');
 }
+
+//////////////////    ADMIN   //////////////////////
+
+
+
+
 
 //////////////////    SOCKET   //////////////////////
 if (config.server.usesocketio) {
     console.log('[IO] socket IO is enabled');
-    global.io = require('socket.io')(adminhttp);
-    console.log('[IO] socket created on admin port ' + config.adminserver.port);
+    global.io = require('socket.io')(http);
+    console.log('[IO] socket created on admin port ' + config.server.port);
     //global.io.set( 'origins', '*' );
     global.io.on('connection', function (socket) {
         socket = socket;
