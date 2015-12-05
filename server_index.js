@@ -162,7 +162,7 @@ var gracefullRestart = function (code) {
     setTimeout(function () {
         console.log('[' + pid + '][AUTOSTART] starting child');
         monitorProcess.start();
-    }, 3000);
+    }, 2000);
 }
 
 /**

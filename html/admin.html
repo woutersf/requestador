@@ -6,6 +6,7 @@
   <ul class="nav nav-tabs toggles">
     <li role="presentation"><a href="javascript://" class="toggle toggle1" rel="listeners">Listeners</a></li>
     <li role="presentation"><a href="javascript://" class="toggle toggle1" rel="senders">Senders</a></li>
+      <li role="presentation"><a href="javascript://" class="toggle toggle1" rel="amqp">Amqp</a></li>
     <li role="presentation"><a href="javascript://" class="toggle toggle1" rel="socket">test socket</a></li>
     <li role="presentation"><a href="javascript://" class="toggle toggle1" rel="socketmessages">socket log</a></li>
       <li role="presentation"><a href="javascript://" class="reloadConfig" rel="reloadConfig">reload config</a></li>
@@ -19,7 +20,7 @@
   <div class="row toggled" id="senders">
       <h1>Senders</h1>
       "<i>name | method | url | data</i>" <br>Allowerd datatypes: forward (forward postbody or socket msg) empty or fixed
-      <form method="POST" action="/admin/senders">
+      <form method="POST" action="/senders">
       <div class="input-group">
         <textarea  name="senders" id="senders" class="form-control" style="width:600px;height:400px;">{{ senders }}</textarea><br>
       </div>
@@ -34,7 +35,7 @@
   <div class="row toggled" id="listeners">
       <h1>Listeners</h1>
       "<i>name | method | uri | senders_csv</i>"
-      <form method="POST" action="/admin/listeners">
+      <form method="POST" action="/listeners">
       <div class="input-group">
         <textarea    name="listeners" id="listeners"  class="form-control" style="width:600px;height:400px;">{{ listeners }}</textarea>
       </div>
@@ -43,6 +44,20 @@
       </div>
       </form>
   </div>
+
+
+<div class="row toggled" id="amqp">
+    <h1>AMQP</h1>
+    "<i>ini config style</i>"
+    <form method="POST" action="/amqp">
+        <div class="input-group">
+            <textarea    name="amqp" id="amqp"  class="form-control" style="width:600px;height:400px;">{{ amqp }}</textarea>
+        </div>
+        <div class="input-group">
+            <input name="submit" id="submit"   class="form-control btn btn-success" type="submit" value="Save"/>
+        </div>
+    </form>
+</div>
 
 
   <div class="row toggled" id="socket">
@@ -77,11 +92,15 @@ $(document).ready(function(){
 
     //ON SOCKET receive
     var socket = io('{{ socketserver }}');
-    socket.on('testchannel1', function(data) {
-          console.log('socket data received:',data);
-          var html = '<li>' + JSON.stringify(data); + '</li>' ;
-          $('#messages').append(html);
+    var testchannels = ['test','tosock','anonymous','administrator','whatever'];
+    testchannels.forEach(function(channel){
+        socket.on(channel, function(data) {
+            console.log('socket data received:',data);
+            var html = '<li>' + JSON.stringify(data); + '</li>' ;
+            $('#messages').append(html);
+        });
     });
+
 
     //POST TO SOCKET
     $('#socketTest').submit(function(){
@@ -105,7 +124,7 @@ $(document).ready(function(){
     $('.reloadConfig').click(function(e){
         e.preventDefault();
         if (window.confirm("Are you sure you want to reload the config (is it any good)?")) {
-            location.href = '/admin/restart';
+            location.href = '/restart';
         }
     });
 
