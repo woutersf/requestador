@@ -8,7 +8,6 @@ var amqp = require('amqp');
 var util = require('util');
 var auth = require('http-auth');
 var swig  = require('swig');
-var pam = require('authenticate-pam');
 var functions = require('./functions');
 var data = require('./data');
 functions.checkExistingFiles();
