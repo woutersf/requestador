@@ -110,11 +110,7 @@ var connectAmqpServer = function (amqpServer) {
                                     message = message.data.toString('utf8');
                                 }
                                 console.log(message);
-                                if (typeof message == 'object') {
-                                    var json = JSON.stringify(message)
-                                } else {
-                                    json = message;
-                                }
+                                json = message;
 
                                 var trigger = {};
                                 trigger.type = 'AMQP';
