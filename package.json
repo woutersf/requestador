@@ -26,8 +26,7 @@
     "swig": "^1.4.2",
     "express": "^4.13.3",
     "winston": "^0.8.0",
-    "express-pam" : ">= 0.1.0",
-    "authenticate-pam": ">= 1.0.0"
+    "express-pam" : "vrtdev/node-express-pam"
   },
   "engines": {
     "node": ">=0.10.33"
