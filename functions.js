@@ -109,12 +109,12 @@ var connectAmqpServer = function (amqpServer) {
                                 if (typeof message.data != 'undefined') {
                                     message = message.data.toString('utf8');
                                 }
-                                console.log(message);
-                                if (typeof message == 'object') {
-                                    var json = JSON.stringify(message)
-                                } else {
-                                    json = message;
-                                }
+                                //console.log(message);
+                                // if (typeof message == 'object') {
+                                //     var json = JSON.stringify(message)
+                                // } else {
+                                json = message;
+                                //}
 
                                 var trigger = {};
                                 trigger.type = 'AMQP';
@@ -207,7 +207,7 @@ var executeSenderHTTP = function (req, sender, body, headers, trigger) {
         var postObject = {
             headers: PostHeaders,
             url: sender.url,
-            body: require('querystring').stringify(body)
+            form: body
         };
         if (global.config.proxy.proxy_enabled) {
             console.log('[HTTP] PROXY: ' + 'http://' + global.config.proxy.proxy_server + ':' + global.config.proxy.proxy_port);
