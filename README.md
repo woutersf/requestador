@@ -3,7 +3,7 @@
 ## Demo ##
 See this youtube video for an example implenetation in drupal.
 This is only a fraction of what this software does.
-https://www.youtube.com/enhance?v=4fv0t62wPf0
+https://www.youtube.com/watch?v=4fv0t62wPf0
 
 ## Intro ##
 Sometimes you need POSTs to be GET's, POST to become socket messages or
