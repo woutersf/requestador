@@ -98,7 +98,7 @@ var connectAmqpServer = function (amqpServer) {
                         amqpConnection.queue(listener.queue, options, function (q) {
                             console.log('[' + amqpServer.name + '] queue connected ' + listener.queue);
                             //var subscribeOptions = {ack: true};//Ack manually
-                            var subscribeOptions = {ack: false};//Ack immedately
+                            var subscribeOptions = {ack: true};
                             q.subscribe(subscribeOptions, function (message, headers, deliveryInfo, messageObject) {
                                 console.log('=============AMQ MESG================');
                                 console.log('[' + amqpServer.name + '] [' + listener.url + ']received on Queue: ');
@@ -140,6 +140,7 @@ var connectAmqpServer = function (amqpServer) {
  * Do sending
  */
 var executeSender = function (req, sender, body, headers, trigger) {
+    module.exports.ackTrigger(trigger);
     if (sender.type == 'POST') {
         module.exports.executeSenderHTTP(req, sender, body, headers, trigger);
     }
@@ -148,19 +149,17 @@ var executeSender = function (req, sender, body, headers, trigger) {
     }
     if (sender.type == 'SOCKET') {
         module.exports.executeSenderSOCKET(req, sender, body, headers);
-        module.exports.ackTrigger(trigger);
     }
     if (sender.type == 'AMQP') {
         module.exports.executeSenderAMQP(req, sender, body, headers);
-        module.exports.ackTrigger(trigger);
     }
 };
 
 var ackTrigger = function (trigger) {
     // Dead lettering is not supportet at the moment.
-    // if (typeof trigger != 'undefined' && trigger.type  == 'AMQP') {
-    //     module.exports.ackAmqpObject(trigger.message);
-    // }
+    if (typeof trigger != 'undefined' && trigger.type  == 'AMQP') {
+        module.exports.ackAmqpObject(trigger.message);
+    }
 };
 
 var rejectTrigger = function (trigger) {
@@ -221,7 +220,6 @@ var executeSenderHTTP = function (req, sender, body, headers, trigger) {
             if (!error && response.statusCode == 200) {
                 console.log('[POSTREQUEST] request returned OK');
                 console.log(body);
-                module.exports.ackTrigger(trigger);
             } else {
                 console.log('[POSTREQUEST] request returned NOK: ');
                 var postResultObject = postObject;

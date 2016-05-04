@@ -1,6 +1,6 @@
 {
   "name": "Requestador",
-  "version": "1.4.9",
+  "version": "1.4.5",
   "private": true,
   "scripts": {
     "start": "node ."
